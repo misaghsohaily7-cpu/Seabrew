@@ -23,6 +23,8 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
   const archRef = useRef<HTMLDivElement>(null);
   const bottleRef = useRef<HTMLDivElement>(null);
   const wavePathRef = useRef<SVGPathElement>(null);
+  const waveStrokeRef = useRef<SVGPathElement>(null);
+  const secondaryWaveStrokeRef = useRef<SVGPathElement>(null);
 
   // Dedicated Magnetic Parallax & 3D Depth Refs
   const textColParallaxRef = useRef<HTMLDivElement>(null);
@@ -38,7 +40,10 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
     registerMotionPlugins();
     if (prefersReducedMotion()) return;
 
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia(sectionRef);
+
+    // Desktop: rich 3D multi-plane parallax, DrawSVG wave lines, interactive bottle levitation & tilt
+    mm.add('(min-width: 768px)', () => {
       // 1. Initial choreographed entrance
       const tl = gsap.timeline({
         paused: !introReady,
@@ -80,13 +85,32 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
         tl.play();
       }
 
+      // DrawSVG stroke drawing on desktop
+      if (waveStrokeRef.current && secondaryWaveStrokeRef.current) {
+        gsap.fromTo(
+          [waveStrokeRef.current, secondaryWaveStrokeRef.current],
+          { drawSVG: '0%' },
+          {
+            drawSVG: '100%',
+            duration: 2.2,
+            stagger: 0.35,
+            ease: 'pour',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 75%',
+              toggleActions: 'play none none reverse',
+            },
+          }
+        );
+      }
+
       // 2. Multi-Plane Magnetic Parallax reacting to scroll position
       const scrollTl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top top',
           end: 'bottom top',
-          scrub: 1.4, // Smooth elastic damping for a subtle magnetic inertia
+          scrub: 1.2,
         },
         defaults: { ease: 'none' },
       });
@@ -270,9 +294,74 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
         window.addEventListener('mousemove', handleMouseMove, { passive: true });
         return () => window.removeEventListener('mousemove', handleMouseMove);
       }
-    }, sectionRef);
+    });
 
-    return () => ctx.revert();
+    // Mobile: distinct lighter choreography with 60fps performance and touch optimization
+    mm.add('(max-width: 767px)', () => {
+      const mobileTl = gsap.timeline({
+        paused: !introReady,
+        defaults: { ease: 'tide' },
+      });
+
+      mobileTl
+        .fromTo(
+          [titleLine1Ref.current, titleLine2Ref.current],
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.8, stagger: 0.1 }
+        )
+        .fromTo(subtitleRef.current, { opacity: 0 }, { opacity: 1, duration: 0.6 }, '-=0.4')
+        .fromTo(
+          [archRef.current, bottleRef.current],
+          { opacity: 0, scale: 0.95 },
+          { opacity: 1, scale: 1, duration: 0.8, stagger: 0.15 },
+          '-=0.5'
+        )
+        .fromTo(ctaContainerRef.current, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.6 }, '-=0.3');
+
+      if (introReady) {
+        mobileTl.play();
+      }
+
+      // DrawSVG stroke drawing on mobile
+      if (waveStrokeRef.current) {
+        gsap.fromTo(
+          waveStrokeRef.current,
+          { drawSVG: '0%' },
+          {
+            drawSVG: '100%',
+            duration: 1.8,
+            ease: 'pour',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 80%',
+            },
+          }
+        );
+      }
+
+      // Gentle vertical parallax on mobile (zero rotation or matrix tilt)
+      gsap.to(bottleParallaxRef.current, {
+        y: -25,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 1.0,
+        },
+      });
+
+      // Subtle float
+      gsap.to(bottleRef.current, {
+        y: -6,
+        duration: 2.8,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+      });
+    });
+
+    return () => mm.revert();
   }, [introReady]);
 
   return (
@@ -440,18 +529,36 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
                 aria-hidden="true"
               />
 
-              {/* Minimal sea water horizon in SVG */}
+              {/* Minimal sea water horizon in SVG with DrawSVG stroke lines */}
               <svg
-                viewBox="0 0 900 60"
-                className="absolute bottom-0 inset-x-0 w-full h-16 pointer-events-none"
+                viewBox="0 0 900 80"
+                className="absolute bottom-0 inset-x-0 w-full h-20 pointer-events-none overflow-visible"
                 preserveAspectRatio="none"
-                fill="#7FA096"
-                opacity="0.35"
+                fill="none"
                 aria-hidden="true"
               >
+                {/* Coastal wave stroke drawn via DrawSVG */}
+                <path
+                  ref={waveStrokeRef}
+                  d="M 0 40 C 150 18, 300 58, 450 38 C 600 18, 750 52, 900 38"
+                  stroke="#A78040"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  opacity="0.8"
+                />
+                <path
+                  ref={secondaryWaveStrokeRef}
+                  d="M 0 55 C 160 35, 320 68, 480 48 C 640 28, 780 62, 900 50"
+                  stroke="#7FA096"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  opacity="0.6"
+                />
                 <path
                   ref={wavePathRef}
-                  d="M 0 30 C 150 45, 300 15, 450 30 C 600 45, 750 15, 900 30 L 900 60 L 0 60 Z"
+                  d="M 0 45 C 150 58, 300 32, 450 45 C 600 58, 750 32, 900 45 L 900 80 L 0 80 Z"
+                  fill="#7FA096"
+                  opacity="0.3"
                 />
               </svg>
             </div>

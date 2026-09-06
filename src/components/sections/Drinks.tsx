@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { Flip } from 'gsap/Flip';
 import { registerMotionPlugins, prefersReducedMotion } from '../../lib/motion';
 import { siteContent } from '../../content';
 import { BrandButton } from '../ui/Button';
@@ -15,28 +16,55 @@ export const Drinks: React.FC = () => {
   const bottle1Ref = useRef<HTMLDivElement>(null);
   const bottle2Ref = useRef<HTMLDivElement>(null);
 
+  const [activeCardIndex, setActiveCardIndex] = useState<number>(0);
+
+  // Smooth layout expansion and reordering via GSAP Flip Plugin
+  const handleSelectCard = (index: number) => {
+    if (activeCardIndex === index) return;
+    if (prefersReducedMotion()) {
+      setActiveCardIndex(index);
+      return;
+    }
+
+    const cards = [card1Ref.current, card2Ref.current].filter(Boolean);
+    const state = Flip.getState(cards, {
+      props: 'transform,boxShadow',
+    });
+
+    setActiveCardIndex(index);
+
+    requestAnimationFrame(() => {
+      Flip.from(state, {
+        duration: 0.65,
+        ease: 'tide',
+        scale: true,
+        nested: true,
+      });
+    });
+  };
+
   useEffect(() => {
     registerMotionPlugins();
     if (prefersReducedMotion()) return;
 
-    const ctx = gsap.context(() => {
-      const isDesktop = window.innerWidth >= 1024;
+    const mm = gsap.matchMedia(sectionRef);
 
-      if (isDesktop && trackRef.current && sectionRef.current) {
-        // Desktop horizontal scrub with pinned section
+    // Desktop: Pinned scrub + velocity skew + subtle bottle levitation
+    mm.add('(min-width: 1024px)', () => {
+      if (trackRef.current && sectionRef.current) {
         gsap.to(trackRef.current, {
-          xPercent: -35,
+          xPercent: -32,
           ease: 'none',
           scrollTrigger: {
             trigger: sectionRef.current,
             start: 'top top',
-            end: '+=1300',
+            end: '+=1200',
             pin: true,
             scrub: 1,
             invalidateOnRefresh: true,
             onUpdate: (self) => {
               const velocity = self.getVelocity();
-              const skew = Math.max(-2.5, Math.min(2.5, velocity / 400));
+              const skew = Math.max(-2, Math.min(2, velocity / 500));
               gsap.to([card1Ref.current, card2Ref.current], {
                 skewX: skew,
                 duration: 0.2,
@@ -50,74 +78,91 @@ export const Drinks: React.FC = () => {
         // Bottle parallax floating
         gsap.to(bottle1Ref.current, {
           y: -40,
-          rotate: 2,
+          rotate: 1.8,
           ease: 'none',
           scrollTrigger: {
             trigger: sectionRef.current,
             start: 'top top',
-            end: '+=1300',
+            end: '+=1200',
             scrub: 1,
           },
         });
 
         gsap.to(bottle2Ref.current, {
-          y: -55,
-          rotate: -2,
+          y: -50,
+          rotate: -1.8,
           ease: 'none',
           scrollTrigger: {
             trigger: sectionRef.current,
             start: 'top top',
-            end: '+=1300',
+            end: '+=1200',
             scrub: 1.2,
           },
         });
       }
+    });
 
-      // Arch entrance clip-path
+    // Mobile & Tablet: Native vertical scroll (zero pinning or horizontal lock)
+    mm.add('(max-width: 1023px)', () => {
       gsap.fromTo(
         [card1Ref.current, card2Ref.current],
+        { y: 40, opacity: 0.2 },
         {
-          clipPath: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)',
-          y: 60,
-          opacity: 0.5,
-        },
-        {
-          clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
           y: 0,
           opacity: 1,
-          duration: 1.2,
-          stagger: 0.25,
+          duration: 0.85,
+          stagger: 0.2,
           ease: 'tide',
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: 'top 70%',
+            start: 'top 80%',
           },
         }
       );
+    });
 
-      // Staggered reveal for section header (tag, heading, narrative subheading)
-      if (headerRef.current) {
-        const headerElements = headerRef.current.children;
-        gsap.fromTo(
-          headerElements,
-          { opacity: 0, y: 36 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.95,
-            stagger: 0.16,
-            ease: 'tide',
-            scrollTrigger: {
-              trigger: headerRef.current,
-              start: 'top 85%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
+    // Common: Entrance reveal
+    gsap.fromTo(
+      [card1Ref.current, card2Ref.current],
+      {
+        clipPath: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)',
+        opacity: 0.5,
+      },
+      {
+        clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+        opacity: 1,
+        duration: 1.2,
+        stagger: 0.25,
+        ease: 'tide',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 70%',
+        },
       }
-    }, sectionRef);
+    );
 
-    return () => ctx.revert();
+    // Staggered reveal for section header
+    if (headerRef.current) {
+      const headerElements = headerRef.current.children;
+      gsap.fromTo(
+        headerElements,
+        { opacity: 0, y: 36 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.95,
+          stagger: 0.16,
+          ease: 'tide',
+          scrollTrigger: {
+            trigger: headerRef.current,
+            start: 'top 85%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
+    }
+
+    return () => mm.revert();
   }, []);
 
   return (
@@ -131,17 +176,53 @@ export const Drinks: React.FC = () => {
       aria-label="بخش معرفی نوشیدنی‌های SEA BREW"
     >
       <div className="max-w-[1440px] mx-auto px-[6vw] mb-12 sm:mb-16">
-        <div ref={headerRef} className="flex flex-col items-start max-w-2xl">
-          <span className="text-xs sm:text-sm font-bold text-[#825F27] mb-3 flex items-center gap-2">
-            <InkBeanStem className="w-4 h-4 text-[#A78040]" />
-            <span>{siteContent.drinks.sectionTag}</span>
-          </span>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-[#161617] mb-4">
-            {siteContent.drinks.heading}
-          </h2>
-          <p className="text-base sm:text-lg font-medium text-[#161617]/80 leading-relaxed">
-            {siteContent.drinks.subheading}
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+          <div ref={headerRef} className="flex flex-col items-start max-w-2xl">
+            <span className="text-xs sm:text-sm font-bold text-[#825F27] mb-3 flex items-center gap-2">
+              <InkBeanStem className="w-4 h-4 text-[#A78040]" />
+              <span>{siteContent.drinks.sectionTag}</span>
+            </span>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-[#161617] mb-4">
+              {siteContent.drinks.heading}
+            </h2>
+            <p className="text-base sm:text-lg font-medium text-[#161617]/80 leading-relaxed">
+              {siteContent.drinks.subheading}
+            </p>
+          </div>
+
+          {/* Interactive Flip Tab Switcher */}
+          <div
+            className="flex items-center gap-2 p-1.5 rounded-full bg-[#161617]/10 border border-[#825F27]/30 backdrop-blur-sm self-start sm:self-end"
+            role="tablist"
+            aria-label="انتخاب لاین نوشیدنی"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeCardIndex === 0}
+              onClick={() => handleSelectCard(0)}
+              className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${
+                activeCardIndex === 0
+                  ? 'bg-[#161617] text-[#FFFADE] shadow-lg ring-1 ring-[#A78040]'
+                  : 'text-[#161617]/75 hover:text-[#161617]'
+              }`}
+            >
+              {siteContent.drinks.lines[0].lineTitle}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeCardIndex === 1}
+              onClick={() => handleSelectCard(1)}
+              className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${
+                activeCardIndex === 1
+                  ? 'bg-[#FFFADE] text-[#161617] shadow-lg border border-[#825F27]/30 ring-1 ring-[#FDB716]'
+                  : 'text-[#161617]/75 hover:text-[#161617]'
+              }`}
+            >
+              {siteContent.drinks.lines[1].lineTitle}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -154,7 +235,22 @@ export const Drinks: React.FC = () => {
           {/* Card 1: خط دم‌آوری تخصصی (Apothecary Green Bottle / Dark Arch Card) */}
           <div
             ref={card1Ref}
-            className="group relative flex-1 min-w-[320px] lg:min-w-[480px] rounded-t-[999px] rounded-b-[28px] bg-[#161617] text-[#FFFADE] border border-[#A78040]/40 p-8 sm:p-12 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300 will-change-transform"
+            onClick={() => handleSelectCard(0)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleSelectCard(0);
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-pressed={activeCardIndex === 0}
+            aria-label={`لاین نوشیدنی: ${siteContent.drinks.lines[0].title}`}
+            className={`group relative min-w-[320px] lg:min-w-[460px] rounded-t-[999px] rounded-b-[28px] bg-[#161617] text-[#FFFADE] border p-8 sm:p-12 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300 will-change-transform cursor-pointer ${
+              activeCardIndex === 0
+                ? 'lg:flex-[1.25] border-[#A78040] ring-2 ring-[#A78040]/50 shadow-[0_20px_50px_rgba(167,128,64,0.2)]'
+                : 'lg:flex-[0.88] border-[#A78040]/25 opacity-90 hover:opacity-100'
+            }`}
             style={{ minHeight: '660px' }}
           >
             {/* Ambient Background Warm Halo */}
@@ -292,7 +388,22 @@ export const Drinks: React.FC = () => {
           {/* Card 2: خط تازه ساحلی (Clear Glass Bottle / Cream Arch Card) */}
           <div
             ref={card2Ref}
-            className="group relative flex-1 min-w-[320px] lg:min-w-[480px] rounded-t-[999px] rounded-b-[28px] bg-[#FFFADE] text-[#161617] border border-[#A78040]/50 p-8 sm:p-12 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300 will-change-transform"
+            onClick={() => handleSelectCard(1)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleSelectCard(1);
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-pressed={activeCardIndex === 1}
+            aria-label={`لاین نوشیدنی: ${siteContent.drinks.lines[1].title}`}
+            className={`group relative min-w-[320px] lg:min-w-[460px] rounded-t-[999px] rounded-b-[28px] bg-[#FFFADE] text-[#161617] border p-8 sm:p-12 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300 will-change-transform cursor-pointer ${
+              activeCardIndex === 1
+                ? 'lg:flex-[1.25] border-[#825F27] ring-2 ring-[#FDB716]/60 shadow-[0_20px_50px_rgba(253,183,22,0.2)]'
+                : 'lg:flex-[0.88] border-[#A78040]/30 opacity-90 hover:opacity-100'
+            }`}
             style={{ minHeight: '660px' }}
           >
             {/* Ambient Background Glow */}

@@ -15,8 +15,10 @@ export const Story: React.FC = () => {
     registerMotionPlugins();
     if (prefersReducedMotion()) return;
 
-    const ctx = gsap.context(() => {
-      // 1. Choreographed Section Entrance Timeline
+    const mm = gsap.matchMedia(sectionRef);
+
+    // Desktop: Architectural ellipse clip-path scrub, night overlay, staggered scale
+    mm.add('(min-width: 768px)', () => {
       if (headerRef.current) {
         gsap.fromTo(
           headerRef.current.children,
@@ -36,7 +38,6 @@ export const Story: React.FC = () => {
         );
       }
 
-      // 2. Chapters Staggered Reveal via Timeline
       if (chaptersContainerRef.current) {
         gsap.fromTo(
           chaptersContainerRef.current.children,
@@ -57,8 +58,6 @@ export const Story: React.FC = () => {
         );
       }
 
-      // 3. Smooth Day-to-Night Ambient Transition Scrub
-      // Gradually deepens atmosphere from warm midday beach into dusk and midnight ink
       if (nightOverlayRef.current && sectionRef.current) {
         gsap.fromTo(
           nightOverlayRef.current,
@@ -76,7 +75,6 @@ export const Story: React.FC = () => {
         );
       }
 
-      // 4. Full-width ink panel with arch clip-path rising from bottom
       if (darkTransitionPanelRef.current) {
         gsap.fromTo(
           darkTransitionPanelRef.current,
@@ -97,9 +95,65 @@ export const Story: React.FC = () => {
           }
         );
       }
-    }, sectionRef);
+    });
 
-    return () => ctx.revert();
+    // Mobile: Lightweight vertical fade-ins without heavy clipPath recalculation
+    mm.add('(max-width: 767px)', () => {
+      if (headerRef.current) {
+        gsap.fromTo(
+          headerRef.current.children,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.75,
+            stagger: 0.12,
+            ease: 'tide',
+            scrollTrigger: {
+              trigger: headerRef.current,
+              start: 'top 88%',
+            },
+          }
+        );
+      }
+
+      if (chaptersContainerRef.current) {
+        gsap.fromTo(
+          chaptersContainerRef.current.children,
+          { opacity: 0, y: 28 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.75,
+            stagger: 0.15,
+            ease: 'tide',
+            scrollTrigger: {
+              trigger: chaptersContainerRef.current,
+              start: 'top 85%',
+            },
+          }
+        );
+      }
+
+      if (darkTransitionPanelRef.current) {
+        gsap.fromTo(
+          darkTransitionPanelRef.current,
+          { opacity: 0, y: 30 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: 'tide',
+            scrollTrigger: {
+              trigger: darkTransitionPanelRef.current,
+              start: 'top 92%',
+            },
+          }
+        );
+      }
+    });
+
+    return () => mm.revert();
   }, []);
 
   const chapterIcons = [

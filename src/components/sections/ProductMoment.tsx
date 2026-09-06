@@ -89,14 +89,13 @@ export const ProductMoment: React.FC = () => {
 
     if (prefersReducedMotion()) return;
 
-    const ctx = gsap.context(() => {
-      const isMobile = window.innerWidth < 768;
-      const scrollDistance = isMobile ? 1800 : 2600;
+    const mm = gsap.matchMedia(sectionRef);
 
+    mm.add('(min-width: 768px)', () => {
       const trigger = ScrollTrigger.create({
         trigger: sectionRef.current,
         start: 'top top',
-        end: `+=${scrollDistance}`,
+        end: '+=2600',
         pin: pinContainerRef.current,
         anticipatePin: 1,
         scrub: 1.2,
@@ -107,7 +106,6 @@ export const ProductMoment: React.FC = () => {
             setScrollPercent(p);
             setIsPouringStream(self.direction > 0 && p > 0.18 && p < 0.94);
 
-            // Determine active stage
             if (p < 0.32) setActiveStageIndex(0);
             else if (p < 0.62) setActiveStageIndex(1);
             else if (p < 0.86) setActiveStageIndex(2);
@@ -117,13 +115,39 @@ export const ProductMoment: React.FC = () => {
       });
 
       scrollTriggerInstance.current = trigger;
-    }, sectionRef);
+    });
+
+    mm.add('(max-width: 767px)', () => {
+      const trigger = ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top top',
+        end: '+=1600',
+        pin: pinContainerRef.current,
+        anticipatePin: 1,
+        scrub: 1.0,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          if (!isPlayingRef.current) {
+            const p = Math.max(0.08, Math.min(0.96, self.progress * 0.92 + 0.08));
+            setScrollPercent(p);
+            setIsPouringStream(self.direction > 0 && p > 0.18 && p < 0.94);
+
+            if (p < 0.32) setActiveStageIndex(0);
+            else if (p < 0.62) setActiveStageIndex(1);
+            else if (p < 0.86) setActiveStageIndex(2);
+            else setActiveStageIndex(3);
+          }
+        },
+      });
+
+      scrollTriggerInstance.current = trigger;
+    });
 
     return () => {
       if (autoPlayTweenRef.current) {
         autoPlayTweenRef.current.kill();
       }
-      ctx.revert();
+      mm.revert();
       scrollTriggerInstance.current = null;
     };
   }, []);

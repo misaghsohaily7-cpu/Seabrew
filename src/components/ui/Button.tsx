@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { gsap } from 'gsap';
+import { registerMotionPlugins, prefersReducedMotion } from '../../lib/motion';
 import { InkCoffeeBranch, InkLeaf, InkBeanStem } from './InkPattern';
 
 export interface BrandButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -9,6 +11,7 @@ export interface BrandButtonProps extends React.ButtonHTMLAttributes<HTMLButtonE
   onClick?: (e: React.MouseEvent<any>) => void;
   className?: string;
   id?: string;
+  magnetic?: boolean;
 }
 
 export const BrandButton: React.FC<BrandButtonProps> = ({
@@ -20,10 +23,35 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
   className = '',
   id,
   disabled,
+  magnetic = true,
   ...rest
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const isPrimary = variant === 'primary';
+
+  const elementRef = useRef<HTMLButtonElement & HTMLAnchorElement>(null);
+  const xQuickTo = useRef<((value: number) => void) | null>(null);
+  const yQuickTo = useRef<((value: number) => void) | null>(null);
+
+  useEffect(() => {
+    registerMotionPlugins();
+    if (!magnetic || !elementRef.current || prefersReducedMotion()) return;
+
+    // Initialize high-performance quickTo setters for buttery 60fps tracking
+    xQuickTo.current = gsap.quickTo(elementRef.current, 'x', {
+      duration: 0.32,
+      ease: 'tide',
+    });
+    yQuickTo.current = gsap.quickTo(elementRef.current, 'y', {
+      duration: 0.32,
+      ease: 'tide',
+    });
+
+    return () => {
+      xQuickTo.current = null;
+      yQuickTo.current = null;
+    };
+  }, [magnetic]);
 
   // Base styling adhering to section 6
   // padding 15px block / 45px inline using logical properties (py-[15px] px-[45px])
@@ -32,7 +60,7 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
   const containerClasses = `
     group relative inline-flex items-center justify-center
     rounded-full font-semibold text-[1rem] leading-none select-none
-    py-[15px] px-[45px] cursor-pointer
+    py-[15px] px-[45px] cursor-pointer will-change-transform
     transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.025] active:scale-[0.96]
     ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
     ${
@@ -148,20 +176,63 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
   );
 
   const handleMouseEnter = () => setIsHovered(true);
-  const handleMouseLeave = () => setIsHovered(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (!magnetic || !elementRef.current || prefersReducedMotion()) return;
+    const rect = elementRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // Strict boundary & pull constraints:
+    // Capped between -22px and +22px, gentle 0.25 tracking ratio
+    const MAX_DISPLACEMENT = 22;
+    const PULL_FACTOR = 0.25;
+
+    const deltaX = (e.clientX - centerX) * PULL_FACTOR;
+    const deltaY = (e.clientY - centerY) * PULL_FACTOR;
+
+    const clampedX = Math.max(-MAX_DISPLACEMENT, Math.min(MAX_DISPLACEMENT, deltaX));
+    const clampedY = Math.max(-MAX_DISPLACEMENT, Math.min(MAX_DISPLACEMENT, deltaY));
+
+    xQuickTo.current?.(clampedX);
+    yQuickTo.current?.(clampedY);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    if (!magnetic || !elementRef.current || prefersReducedMotion()) return;
+
+    // Smooth return to resting position using custom brand ease 'tide'
+    gsap.to(elementRef.current, {
+      x: 0,
+      y: 0,
+      duration: 0.5,
+      ease: 'tide',
+      overwrite: 'auto',
+    });
+  };
+
   const handleFocus = () => setIsHovered(true);
-  const handleBlur = () => setIsHovered(false);
+  const handleBlur = () => {
+    setIsHovered(false);
+    if (elementRef.current && !prefersReducedMotion()) {
+      gsap.to(elementRef.current, { x: 0, y: 0, duration: 0.4, ease: 'tide', overwrite: 'auto' });
+    }
+  };
 
   if (asAnchor && href) {
     return (
       <a
+        ref={elementRef as unknown as React.RefObject<HTMLAnchorElement>}
         id={id}
         href={href}
         onClick={onClick}
         onMouseEnter={handleMouseEnter}
+        onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        data-magnetic={magnetic ? 'true' : undefined}
         className={containerClasses}
         style={inlineStyles}
         role="button"
@@ -173,13 +244,16 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
 
   return (
     <button
+      ref={elementRef as unknown as React.RefObject<HTMLButtonElement>}
       id={id}
       disabled={disabled}
       onClick={onClick}
       onMouseEnter={handleMouseEnter}
+      onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onFocus={handleFocus}
       onBlur={handleBlur}
+      data-magnetic={magnetic ? 'true' : undefined}
       className={containerClasses}
       style={inlineStyles}
       {...rest}

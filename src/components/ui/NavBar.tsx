@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { siteContent } from '../../content';
 import { BrandButton } from './Button';
 import { SeaBrewLogo } from './SeaBrewLogo';
@@ -29,9 +30,22 @@ export const NavBar: React.FC = () => {
 
   const handleLinkClick = (id: string) => {
     setMobileMenuOpen(false);
+    const smoother = ScrollSmoother.get();
     const element = document.getElementById(id);
-    if (element) {
+    if (smoother && element) {
+      smoother.scrollTo(element, true, 'top top');
+    } else if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const smoother = ScrollSmoother.get();
+    if (smoother) {
+      smoother.scrollTo(0, true);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -46,13 +60,9 @@ export const NavBar: React.FC = () => {
         {/* Official Brand Logo */}
         <a
           href="#hero"
-          onClick={(e) => {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
+          onClick={handleLogoClick}
           className="group flex items-center select-none text-[#161617] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#161617] rounded-full p-1"
           aria-label="SEA BREW — صفحه اصلی"
-          data-magnetic="true"
         >
           <SeaBrewLogo variant="horizontal" size="sm" />
         </a>
@@ -67,7 +77,6 @@ export const NavBar: React.FC = () => {
                 e.preventDefault();
                 handleLinkClick(link.id);
               }}
-              data-magnetic="true"
               className="relative py-2 text-sm font-bold text-[#161617] opacity-80 hover:opacity-100 hover:text-[#825F27] transition-all duration-250 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#161617] rounded-full px-2"
             >
               {link.label}

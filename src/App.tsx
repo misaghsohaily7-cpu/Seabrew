@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { Preloader } from './components/ui/Preloader';
 import { CustomCursor } from './components/ui/Cursor';
 import { NavBar } from './components/ui/NavBar';
@@ -9,7 +10,7 @@ import { Footer } from './components/ui/Footer';
 import { SunScrollIndicator } from './components/ui/SunScrollIndicator';
 import { SectionLoader } from './components/ui/SectionLoader';
 import { ArchDivider } from './components/ui/ArchDivider';
-import { registerMotionPlugins } from './lib/motion';
+import { registerMotionPlugins, prefersReducedMotion } from './lib/motion';
 
 // Lazy-loaded visual and narrative sections for performance & rapid initial hydration
 const Interlude = lazy(() =>
@@ -36,6 +37,31 @@ export default function App() {
 
   useEffect(() => {
     registerMotionPlugins();
+
+    if (prefersReducedMotion()) return;
+
+    // Initialize ScrollSmoother for inertial smooth page scrolling
+    const smoother = ScrollSmoother.create({
+      wrapper: '#smooth-wrapper',
+      content: '#smooth-content',
+      smooth: 1.15,
+      effects: true,
+      smoothTouch: 0.1,
+    });
+
+    const handleMotionToggle = (e: Event) => {
+      const detail = (e as CustomEvent<{ reduced: boolean }>).detail;
+      if (detail.reduced) {
+        smoother.kill();
+      }
+    };
+
+    window.addEventListener('sea_brew_motion_toggle', handleMotionToggle);
+
+    return () => {
+      window.removeEventListener('sea_brew_motion_toggle', handleMotionToggle);
+      smoother.kill();
+    };
   }, []);
 
   return (
@@ -49,110 +75,115 @@ export default function App() {
       {/* 3. Sticky Navigation Bar (Cream canvas, no blur, anchor links, circular mobile overlay) */}
       <NavBar />
 
-      {/* 4. Main Page Structure — 8 Sections in Chronological Day-to-Night Narrative */}
-      <main id="main-content" role="main">
-        {/* Section 1: Hero (Morning light, cream) */}
-        <Hero introReady={introReady} />
+      {/* 4. Smooth Scrolling Container */}
+      <div id="smooth-wrapper" className="w-full overflow-hidden">
+        <div id="smooth-content" className="w-full will-change-transform">
+          {/* Main Page Structure — 8 Sections in Chronological Day-to-Night Narrative */}
+          <main id="main-content" role="main">
+            {/* Section 1: Hero (Morning light, cream) */}
+            <Hero introReady={introReady} />
 
-        {/* Section 2: Statement (Single sentence, cream, scrub word by word) */}
-        <Statement />
+            {/* Section 2: Statement (Single sentence, cream, scrub word by word) */}
+            <Statement />
 
-        {/* Arch Divider: Statement -> Interlude */}
-        <ArchDivider variant="cream-to-warm" label="چشم‌انداز ساحل بوشهر" />
+            {/* Arch Divider: Statement -> Interlude */}
+            <ArchDivider variant="cream-to-warm" label="چشم‌انداز ساحل بوشهر" />
 
-        {/* Section 3: Interlude (Cream -> Warm, full width SVG scene, 3-layer parallax) */}
-        <Suspense
-          fallback={
-            <SectionLoader
-              title="بارگذاری چشم‌انداز ساحلی بوشهر..."
-              theme="warm"
-              minHeight="min-h-[70vh]"
-            />
-          }
-        >
-          <Interlude />
-        </Suspense>
+            {/* Section 3: Interlude (Cream -> Warm, full width SVG scene, 3-layer parallax) */}
+            <Suspense
+              fallback={
+                <SectionLoader
+                  title="بارگذاری چشم‌انداز ساحلی بوشهر..."
+                  theme="warm"
+                  minHeight="min-h-[70vh]"
+                />
+              }
+            >
+              <Interlude />
+            </Suspense>
 
-        {/* Marquee Ticker: Warm phase transition */}
-        <Marquee bg="bg-[#C9B8B6]/30" textColor="text-[#825F27]" />
+            {/* Marquee Ticker: Warm phase transition */}
+            <Marquee bg="bg-[#C9B8B6]/30" textColor="text-[#825F27]" />
 
-        {/* Arch Divider: Marquee -> Drinks */}
-        <ArchDivider variant="warm" label="مجموعه نوشیدنی‌های ساحلی" />
+            {/* Arch Divider: Marquee -> Drinks */}
+            <ArchDivider variant="warm" label="مجموعه نوشیدنی‌های ساحلی" />
 
-        {/* Section 4: Drinks (Warm phase, two arch cards, horizontal scrub pin on desktop) */}
-        <Suspense
-          fallback={
-            <SectionLoader
-              title="بارگذاری نوشیدنی‌های ساحلی..."
-              theme="warm"
-              minHeight="min-h-[80vh]"
-            />
-          }
-        >
-          <Drinks />
-        </Suspense>
+            {/* Section 4: Drinks (Warm phase, two arch cards, horizontal scrub pin on desktop) */}
+            <Suspense
+              fallback={
+                <SectionLoader
+                  title="بارگذاری نوشیدنی‌های ساحلی..."
+                  theme="warm"
+                  minHeight="min-h-[80vh]"
+                />
+              }
+            >
+              <Drinks />
+            </Suspense>
 
-        {/* Arch Divider: Drinks -> Product Moment */}
-        <ArchDivider variant="warm-to-gold" label="هنر دم‌آوری پیاله کلدبرو" />
+            {/* Arch Divider: Drinks -> Product Moment */}
+            <ArchDivider variant="warm-to-gold" label="هنر دم‌آوری پیاله کلدبرو" />
 
-        {/* Section 5: Product Moment (Hero masterpiece, liquid rise scrub, flavor tags popup) */}
-        <Suspense
-          fallback={
-            <SectionLoader
-              title="آماده‌سازی استودیوی دم‌آوری کلدبرو..."
-              theme="warm"
-              minHeight="min-h-[90vh]"
-            />
-          }
-        >
-          <ProductMoment />
-        </Suspense>
+            {/* Section 5: Product Moment (Hero masterpiece, liquid rise scrub, flavor tags popup) */}
+            <Suspense
+              fallback={
+                <SectionLoader
+                  title="آماده‌سازی استودیوی دم‌آوری کلدبرو..."
+                  theme="warm"
+                  minHeight="min-h-[90vh]"
+                />
+              }
+            >
+              <ProductMoment />
+            </Suspense>
 
-        {/* Arch Divider: Product Moment -> Story */}
-        <ArchDivider variant="gold-to-dark" label="روایت سه‌گانه ریشه‌ها" />
+            {/* Arch Divider: Product Moment -> Story */}
+            <ArchDivider variant="gold-to-dark" label="روایت سه‌گانه ریشه‌ها" />
 
-        {/* Section 6: Story (Warm -> Dark transition, 3 chapters, arch dark rise) */}
-        <Suspense
-          fallback={
-            <SectionLoader
-              title="فراخوانی روایت ریشه‌ها در بوشهر..."
-              theme="dark"
-              minHeight="min-h-[80vh]"
-            />
-          }
-        >
-          <Story />
-        </Suspense>
+            {/* Section 6: Story (Warm -> Dark transition, 3 chapters, arch dark rise) */}
+            <Suspense
+              fallback={
+                <SectionLoader
+                  title="فراخوانی روایت ریشه‌ها در بوشهر..."
+                  theme="dark"
+                  minHeight="min-h-[80vh]"
+                />
+              }
+            >
+              <Story />
+            </Suspense>
 
-        {/* Section 7: Find Us (Dark, store & cafe list, commercial clarity, hover arch panel) */}
-        <Suspense
-          fallback={
-            <SectionLoader
-              title="نقشه شعب و مراکز عرضه..."
-              theme="dark"
-              minHeight="min-h-[60vh]"
-            />
-          }
-        >
-          <FindUs />
-        </Suspense>
+            {/* Section 7: Find Us (Dark, store & cafe list, commercial clarity, hover arch panel) */}
+            <Suspense
+              fallback={
+                <SectionLoader
+                  title="نقشه شعب و مراکز عرضه..."
+                  theme="dark"
+                  minHeight="min-h-[60vh]"
+                />
+              }
+            >
+              <FindUs />
+            </Suspense>
 
-        {/* Section 8: Contact (Dark ink, static form + direct channels) */}
-        <Suspense
-          fallback={
-            <SectionLoader
-              title="ارتباط با کارگاه SEA BREW..."
-              theme="dark"
-              minHeight="min-h-[60vh]"
-            />
-          }
-        >
-          <Contact />
-        </Suspense>
-      </main>
+            {/* Section 8: Contact (Dark ink, static form + direct channels) */}
+            <Suspense
+              fallback={
+                <SectionLoader
+                  title="ارتباط با کارگاه SEA BREW..."
+                  theme="dark"
+                  minHeight="min-h-[60vh]"
+                />
+              }
+            >
+              <Contact />
+            </Suspense>
+          </main>
 
-      {/* 5. Footer (Dark ink, vertical parallax reveal, letter-by-letter rising wordmark, TideLine progress) */}
-      <Footer />
+          {/* 5. Footer (Dark ink, vertical parallax reveal, letter-by-letter rising wordmark, TideLine progress) */}
+          <Footer />
+        </div>
+      </div>
 
       {/* 6. Global Solar Scroll Progress Indicator (Line with sliding sun + circular dial) */}
       <SunScrollIndicator />
