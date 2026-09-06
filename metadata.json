@@ -1,0 +1,6 @@
+{
+  "name": "SEA BREW",
+  "description": "وبسایت رسمی برند SEA BREW — نوشیدنی قهوه‌ای آماده‌مصرف از بوشهر، جنوب ایران.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

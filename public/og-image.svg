@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <rect width="1200" height="630" fill="#FFFADE" />
+  <!-- Southern Arch background -->
+  <path d="M 450 100 A 150 150 0 0 1 750 100 L 750 500 A 24 24 0 0 1 726 524 L 474 524 A 24 24 0 0 1 450 500 Z" fill="#C9B8B6" opacity="0.3" />
+  
+  <!-- Sun Dot -->
+  <circle cx="600" cy="220" r="48" fill="#FDB716" />
+  
+  <!-- Horizon TideLine -->
+  <line x1="200" y1="340" x2="1000" y2="340" stroke="#A78040" stroke-width="2" />
+  
+  <!-- Two Waves -->
+  <path d="M 460 380 Q 530 360, 600 380 T 740 380" fill="none" stroke="#161617" stroke-width="4" stroke-linecap="round" />
+  <path d="M 460 410 Q 530 390, 600 410 T 740 410" fill="none" stroke="#161617" stroke-width="4" stroke-linecap="round" />
+
+  <!-- Typography: Wordmark -->
+  <text x="600" y="480" font-family="'Estedad', sans-serif" font-weight="900" font-size="48" fill="#161617" text-anchor="middle" letter-spacing="4">SEA BREW</text>
+  <text x="600" y="530" font-family="'Estedad', sans-serif" font-weight="600" font-size="24" fill="#825F27" text-anchor="middle">نوشیدنی قهوه‌ای از ساحل جنوب</text>
+</svg>

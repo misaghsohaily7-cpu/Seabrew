@@ -1,0 +1,204 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Estedad';
+  src: url('/fonts/Estedad-VF.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --color-cream: #FFFADE;
+  --color-ink: #161617;
+  --color-gold: #A78040;
+  --color-maroon: #825F27;
+  --color-sun: #FDB716;
+  --color-dust: #C9B8B6;
+  --color-seaglass: #7FA096;
+
+  --font-estedad: 'Estedad', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Estedad', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  --radius-pill: 9999px;
+}
+
+:root {
+  --color-cream: #FFFADE;
+  --color-ink: #161617;
+  --color-gold: #A78040;
+  --color-maroon: #825F27;
+  --color-sun: #FDB716;
+  --color-dust: #C9B8B6;
+  --color-seaglass: #7FA096;
+}
+
+html {
+  font-family: 'Estedad', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #FFFADE;
+  color: #161617;
+  direction: rtl;
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+  letter-spacing: normal !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle magnetic snapping for narrative sections */
+section[id] {
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+  scroll-margin-top: 4.5rem;
+}
+
+/* Strictly enforce no letter-spacing on Persian text */
+* {
+  letter-spacing: 0 !important;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #FFFADE;
+  color: #161617;
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+/* Selection */
+::selection {
+  background-color: #A78040;
+  color: #FFFADE;
+}
+
+/* Arch mask and shapes */
+.arch-frame {
+  border-radius: 999px 999px 24px 24px;
+}
+
+.arch-clip {
+  clip-path: inset(0 round 999px 999px 24px 24px);
+}
+
+/* Custom focus ring */
+:focus-visible {
+  outline: 2px solid #161617;
+  outline-offset: 2px;
+}
+
+.focus-ink:focus-visible {
+  outline: 2px solid #161617;
+  outline-offset: 2px;
+}
+
+.focus-cream:focus-visible {
+  outline: 2px solid #FFFADE;
+  outline-offset: 2px;
+}
+
+/* Hide scrollbar for neat aesthetic */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* BrandButton swaying plant branches */
+@keyframes sway-branch-1 {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-6deg);
+  }
+  75% {
+    transform: rotate(9deg);
+  }
+}
+
+@keyframes sway-branch-2 {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(10deg);
+  }
+  70% {
+    transform: rotate(-7deg);
+  }
+}
+
+@keyframes sway-branch-3 {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(-5deg);
+  }
+  80% {
+    transform: rotate(8deg);
+  }
+}
+
+.animate-sway-1 {
+  animation: sway-branch-1 2.9s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.animate-sway-2 {
+  animation: sway-branch-2 3.2s cubic-bezier(0.65, 0, 0.35, 1) 0.4s infinite;
+}
+
+.animate-sway-3 {
+  animation: sway-branch-3 3.4s cubic-bezier(0.65, 0, 0.35, 1) 0.8s infinite;
+}
+
+/* SunDot subtle glow animation */
+@keyframes sun-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+.sun-dot-pulse {
+  animation: sun-pulse 4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* Marquee infinite ticker in RTL */
+@keyframes marquee-rtl {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(50%, 0, 0);
+  }
+}
+
+/* Strict reduced motion fallback */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-sway-1,
+  .animate-sway-2,
+  .animate-sway-3,
+  .sun-dot-pulse {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
