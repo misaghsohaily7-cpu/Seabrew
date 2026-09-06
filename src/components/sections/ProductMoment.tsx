@@ -70,24 +70,24 @@ export const ProductMoment: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const pinContainerRef = useRef<HTMLDivElement>(null);
   const scrollTriggerInstance = useRef<ScrollTrigger | null>(null);
+  const autoPlayTweenRef = useRef<gsap.core.Tween | null>(null);
+  const isPlayingRef = useRef<boolean>(false);
 
   // Progressive states
-  const [scrollPercent, setScrollPercent] = useState<number>(0.12);
-  const [activeStageIndex, setActiveStageIndex] = useState<number>(0);
+  const [scrollPercent, setScrollPercent] = useState<number>(() =>
+    prefersReducedMotion() ? 0.92 : 0.12
+  );
+  const [activeStageIndex, setActiveStageIndex] = useState<number>(() =>
+    prefersReducedMotion() ? 3 : 0
+  );
   const [isPouringStream, setIsPouringStream] = useState<boolean>(false);
   const [isPlayingAuto, setIsPlayingAuto] = useState<boolean>(false);
-
-  const isPlayingRef = useRef<boolean>(false);
 
   // Synchronized GSAP ScrollTrigger with long, deliberate scroll distance
   useEffect(() => {
     registerMotionPlugins();
 
-    if (prefersReducedMotion()) {
-      setScrollPercent(0.92);
-      setActiveStageIndex(3);
-      return;
-    }
+    if (prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
       const isMobile = window.innerWidth < 768;
@@ -128,8 +128,6 @@ export const ProductMoment: React.FC = () => {
     };
   }, []);
 
-  const autoPlayTweenRef = useRef<gsap.core.Tween | null>(null);
-
   // Jump to specific stage smoothly
   const jumpToStage = useCallback((stageIndex: number) => {
     const trigger = scrollTriggerInstance.current;
@@ -146,7 +144,7 @@ export const ProductMoment: React.FC = () => {
     autoPlayTweenRef.current = gsap.to(scrollObj, {
       y: targetScroll,
       duration: 1.2,
-      ease: 'power2.inOut',
+      ease: 'pour',
       onUpdate: () => {
         window.scrollTo(0, scrollObj.y);
       },
@@ -181,7 +179,7 @@ export const ProductMoment: React.FC = () => {
       autoPlayTweenRef.current = gsap.to(scrollObj, {
         y: trigger.end - 50,
         duration: 7.5,
-        ease: 'power1.inOut',
+        ease: 'tide',
         onUpdate: () => {
           window.scrollTo(0, scrollObj.y);
           if (trigger) {

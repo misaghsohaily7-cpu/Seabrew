@@ -1,8 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { registerMotionPlugins, prefersReducedMotion } from '../../lib/motion';
-import { siteContent } from '../../content';
 
 export const Statement: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);

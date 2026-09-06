@@ -1,12 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { registerMotionPlugins, prefersReducedMotion } from '../../lib/motion';
 import { siteContent } from '../../content';
 import { SunDot } from '../ui/SunDot';
 import { BrandButton } from '../ui/Button';
 import { TideLine } from '../ui/TideLine';
-import { InkCoffeeBranch, InkLeaf } from '../ui/InkPattern';
+import { InkCoffeeBranch } from '../ui/InkPattern';
 import { DustParticles } from '../ui/DustParticles';
 
 interface HeroProps {

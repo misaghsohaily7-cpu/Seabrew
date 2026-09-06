@@ -17,7 +17,10 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
   // Smooth lerp progress for buttery animation
   const [smoothProgress, setSmoothProgress] = useState<number>(progress);
   const targetProgressRef = useRef<number>(progress);
-  targetProgressRef.current = progress;
+
+  useEffect(() => {
+    targetProgressRef.current = progress;
+  }, [progress]);
 
   // Wave phase animation
   const [wavePhase, setWavePhase] = useState<number>(0);
@@ -158,20 +161,21 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
       { y: 220, side: 'mid', r: 2.4 },
     ];
 
-    for (const pt of seedPoints) {
+    seedPoints.forEach((pt, i) => {
       const heightRatio = (420 - pt.y) / (420 - 70);
-      let cx = 180;
+      const pseudoOffset = ((i * 13 + 7) % 10) / 10; // Deterministic 0.0 .. 0.9
+      let cx: number;
       if (pt.side === 'left') {
         const outerX = 104 - heightRatio * 28;
-        cx = outerX + 5 + Math.random() * 8;
+        cx = outerX + 5 + pseudoOffset * 8;
       } else if (pt.side === 'right') {
         const outerX = 256 + heightRatio * 28;
-        cx = outerX - 5 - Math.random() * 8;
+        cx = outerX - 5 - pseudoOffset * 8;
       } else {
-        cx = 160 + (Math.random() - 0.5) * 60;
+        cx = 160 + (pseudoOffset - 0.5) * 60;
       }
       list.push({ cx, cy: pt.y, r: pt.r, opacity: 0.75 });
-    }
+    });
     return list;
   }, []);
 

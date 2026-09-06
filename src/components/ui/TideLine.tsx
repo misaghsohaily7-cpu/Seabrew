@@ -15,16 +15,11 @@ export const TideLine: React.FC<TideLineProps> = ({
   color = '#A78040',
   sunColor = '#FDB716',
 }) => {
-  const [progress, setProgress] = useState(sunPosition ?? 50);
+  const [scrollProgress, setScrollProgress] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!trackScrollProgress) {
-      if (sunPosition !== undefined) {
-        setProgress(sunPosition);
-      }
-      return;
-    }
+    if (!trackScrollProgress) return;
 
     const handleScroll = () => {
       const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -33,14 +28,16 @@ export const TideLine: React.FC<TideLineProps> = ({
         100,
         Math.max(0, (window.scrollY / scrollHeight) * 100)
       );
-      setProgress(currentProgress);
+      setScrollProgress(currentProgress);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [trackScrollProgress, sunPosition]);
+  }, [trackScrollProgress]);
+
+  const activeProgress = trackScrollProgress ? scrollProgress : (sunPosition ?? 50);
 
   return (
     <div
@@ -61,7 +58,7 @@ export const TideLine: React.FC<TideLineProps> = ({
         className="absolute top-1/2 -translate-y-1/2 transition-all duration-300 ease-out pointer-events-none"
         style={{
           // In RTL, start to end
-          insetInlineStart: `${progress}%`,
+          insetInlineStart: `${activeProgress}%`,
           transform: 'translate(-50%, -50%)',
         }}
       >

@@ -110,10 +110,10 @@ export const CustomCursor: React.FC = () => {
       {/* Difference Ring */}
       <div
         ref={ringRef}
-        className={`fixed top-0 left-0 rounded-full border border-[#A78040] pointer-events-none transition-[width,height,border-color,background-color] duration-300 ${
+        className={`fixed top-0 left-0 w-8 h-8 rounded-full border pointer-events-none transition-[transform,opacity,border-color,background-color] duration-300 ${
           isHoveringClickable
-            ? 'w-10 h-10 border-[#FDB716] bg-[#FDB716]/10'
-            : 'w-7 h-7 border-[#A78040]/50'
+            ? 'scale-125 border-[#FDB716] bg-[#FDB716]/15'
+            : 'scale-90 border-[#A78040]/50 bg-transparent'
         }`}
         style={{
           mixBlendMode: 'difference',

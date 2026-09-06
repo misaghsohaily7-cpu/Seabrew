@@ -19,11 +19,6 @@ export const SectionLoader: React.FC<SectionLoaderProps> = ({
       ? 'bg-[#FFFADE] text-[#161617]'
       : 'bg-[#C9B8B6]/20 text-[#825F27]';
 
-  const borderClass =
-    theme === 'dark'
-      ? 'border-[#A78040]/30'
-      : 'border-[#A78040]/25';
-
   return (
     <div
       className={`w-full ${minHeight} ${bgClass} flex flex-col items-center justify-center py-20 px-6 transition-opacity duration-500 select-none`}

@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { registerMotionPlugins, prefersReducedMotion } from '../../lib/motion';
 import { siteContent } from '../../content';
-import { toPersianDigits } from '../ui/Preloader';
+import { toPersianDigits } from '../../lib/format';
 import { SunDot } from '../ui/SunDot';
 
 export const Interlude: React.FC = () => {
@@ -13,16 +13,12 @@ export const Interlude: React.FC = () => {
   const archLayerRef = useRef<SVGGElement>(null);
   const seaLayerRef = useRef<SVGGElement>(null);
   const sunLayerRef = useRef<SVGCircleElement>(null);
-  const [degreeN, setDegreeN] = useState(0);
-  const [degreeE, setDegreeE] = useState(0);
+  const [degreeN, setDegreeN] = useState(() => (prefersReducedMotion() ? 28 : 0));
+  const [degreeE, setDegreeE] = useState(() => (prefersReducedMotion() ? 50 : 0));
 
   useEffect(() => {
     registerMotionPlugins();
-    if (prefersReducedMotion()) {
-      setDegreeN(28);
-      setDegreeE(50);
-      return;
-    }
+    if (prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
       // 0. Staggered reveal for header and caption

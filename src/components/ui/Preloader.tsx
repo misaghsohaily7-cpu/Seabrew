@@ -1,32 +1,38 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { prefersReducedMotion } from '../../lib/motion';
+import { toPersianDigits } from '../../lib/format';
 
 interface PreloaderProps {
   onComplete: () => void;
 }
 
-// Persian numerals converter
-export const toPersianDigits = (num: number | string): string => {
-  const farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-  return num.toString().replace(/\d/g, (x) => farsiDigits[parseInt(x, 10)]);
-};
-
 export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
   const [percent, setPercent] = useState(0);
   const [isDismissed, setIsDismissed] = useState(false);
-  const [isRemoved, setIsRemoved] = useState(false);
+  const [isRemoved, setIsRemoved] = useState(() => prefersReducedMotion());
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const dismiss = useCallback(() => {
+    setIsDismissed((prev) => {
+      if (prev) return prev;
+      onComplete();
+      setTimeout(() => {
+        setIsRemoved(true);
+      }, 700);
+      return true;
+    });
+  }, [onComplete]);
+
   useEffect(() => {
-    // If user prefers reduced motion, skip preloader immediately
+    // If user prefers reduced motion, notify onComplete and return
     if (prefersReducedMotion()) {
       onComplete();
-      setIsRemoved(true);
       return;
     }
 
     const duration = 1800; // 1.8s
     const startTime = performance.now();
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const updateCounter = (currentTime: number) => {
       const elapsed = currentTime - startTime;
@@ -40,24 +46,18 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
       } else {
         setPercent(100);
         // Curtain transition starts
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           dismiss();
         }, 150);
       }
     };
 
     const animId = requestAnimationFrame(updateCounter);
-    return () => cancelAnimationFrame(animId);
-  }, []);
-
-  const dismiss = () => {
-    if (isDismissed) return;
-    setIsDismissed(true);
-    onComplete();
-    setTimeout(() => {
-      setIsRemoved(true);
-    }, 700);
-  };
+    return () => {
+      cancelAnimationFrame(animId);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [dismiss, onComplete]);
 
   if (isRemoved) return null;
 

@@ -33,7 +33,7 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
     group relative inline-flex items-center justify-center
     rounded-full font-semibold text-[1rem] leading-none select-none
     py-[15px] px-[45px] cursor-pointer
-    transition-transform duration-300 active:scale-[0.98]
+    transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.025] active:scale-[0.96]
     ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
     ${
       isPrimary

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   registerMotionPlugins,
   prefersReducedMotion,
@@ -15,13 +14,12 @@ import { ZapOff, Sparkles } from 'lucide-react';
 export const Footer: React.FC = () => {
   const footerRef = useRef<HTMLElement>(null);
   const lettersRef = useRef<(HTMLSpanElement | null)[]>([]);
-  const [reducedMotion, setReducedMotion] = useState<boolean>(false);
+  const [reducedMotion, setReducedMotion] = useState<boolean>(() => getReducedMotionPreference());
 
   const letters = ['S', 'E', 'A', ' ', 'B', 'R', 'E', 'W'];
 
   useEffect(() => {
     registerMotionPlugins();
-    setReducedMotion(getReducedMotionPreference());
 
     const handleMotionChange = (e: Event) => {
       const customEvent = e as CustomEvent<{ reduced: boolean }>;

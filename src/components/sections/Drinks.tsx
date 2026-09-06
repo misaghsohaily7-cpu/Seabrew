@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { registerMotionPlugins, prefersReducedMotion } from '../../lib/motion';
 import { siteContent } from '../../content';
 import { BrandButton } from '../ui/Button';
