@@ -28,12 +28,13 @@ export const Footer: React.FC = () => {
         {
           yPercent: 0,
           opacity: 1,
-          duration: 0.4,
-          stagger: 0.06,
+          duration: 0.32,
+          stagger: 0.035,
           ease: 'tide',
           scrollTrigger: {
             trigger: footerRef.current,
-            start: 'top 95%',
+            start: 'top bottom',
+            once: true,
           },
         }
       );

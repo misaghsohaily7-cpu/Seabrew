@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChevronUp } from 'lucide-react';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { prefersReducedMotion } from '../../lib/motion';
@@ -14,28 +14,82 @@ import { prefersReducedMotion } from '../../lib/motion';
  * - The sliding sun on the track visualizes the day-to-night narrative arc
  */
 export const SunScrollIndicator: React.FC = () => {
-  const [scrollProgress, setScrollProgress] = useState(0); // 0 to 100
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isNearBottom, setIsNearBottom] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const progressFillRef = useRef<HTMLSpanElement>(null);
+  const progressSunRef = useRef<HTMLSpanElement>(null);
+  const progressRingRef = useRef<SVGCircleElement>(null);
+  const sunRotationRef = useRef<HTMLSpanElement>(null);
+  const scrollFlagsRef = useRef({ isScrolled: false, isNearBottom: false, isAtBottom: false });
+
+  // SVG circle progress is written once per animation frame, without rerendering
+  // the whole fixed widget for every native scroll event.
+  const radius = 18;
+  const circumference = 2 * Math.PI * radius;
 
   useEffect(() => {
-    const handleScroll = () => {
+    let frameId = 0;
+
+    const updateProgress = () => {
+      frameId = 0;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (docHeight <= 0) {
-        setScrollProgress(0);
-        return;
+      const progress = docHeight > 0
+        ? Math.min(100, Math.max(0, (window.scrollY / docHeight) * 100))
+        : 0;
+
+      if (progressFillRef.current) {
+        progressFillRef.current.style.height = `${progress}%`;
       }
-      const rawProgress = (window.scrollY / docHeight) * 100;
-      const clamped = Math.min(100, Math.max(0, rawProgress));
-      setScrollProgress(clamped);
-      setIsScrolled(window.scrollY > 120);
+      if (progressSunRef.current) {
+        progressSunRef.current.style.top = `calc(${progress}% - 8px)`;
+      }
+      if (progressRingRef.current) {
+        progressRingRef.current.style.strokeDashoffset = String(
+          circumference - (progress / 100) * circumference
+        );
+      }
+      if (sunRotationRef.current) {
+        sunRotationRef.current.style.transform = `rotate(${progress * 3.6}deg)`;
+      }
+      buttonRef.current?.setAttribute(
+        'aria-label',
+        `نشانگر پیشرفت اسکرول: ${Math.round(progress)}٪. کلیک برای بازگشت به آغاز صفحه`
+      );
+
+      const nextFlags = {
+        isScrolled: window.scrollY > 120,
+        isNearBottom: progress > 95,
+        isAtBottom: progress >= 96,
+      };
+      if (nextFlags.isScrolled !== scrollFlagsRef.current.isScrolled) {
+        scrollFlagsRef.current.isScrolled = nextFlags.isScrolled;
+        setIsScrolled(nextFlags.isScrolled);
+      }
+      if (nextFlags.isNearBottom !== scrollFlagsRef.current.isNearBottom) {
+        scrollFlagsRef.current.isNearBottom = nextFlags.isNearBottom;
+        setIsNearBottom(nextFlags.isNearBottom);
+      }
+      if (nextFlags.isAtBottom !== scrollFlagsRef.current.isAtBottom) {
+        scrollFlagsRef.current.isAtBottom = nextFlags.isAtBottom;
+        setIsAtBottom(nextFlags.isAtBottom);
+      }
+    };
+
+    const handleScroll = () => {
+      if (!frameId) frameId = requestAnimationFrame(updateProgress);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
 
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (frameId) cancelAnimationFrame(frameId);
+    };
+  }, [circumference]);
 
   const scrollToTop = () => {
     const smoother = ScrollSmoother.get();
@@ -49,17 +103,12 @@ export const SunScrollIndicator: React.FC = () => {
     }
   };
 
-  // Calculate SVG circle progress
-  const radius = 18;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (scrollProgress / 100) * circumference;
-
   // Fade the dial out near the page bottom — the footer's TideLine takes over
   // the progress display there, so the two never overlap.
-  const isAtBottom = scrollProgress >= 96;
 
   return (
     <button
+      ref={buttonRef}
       type="button"
       onClick={scrollToTop}
       onMouseEnter={() => setShowTooltip(true)}
@@ -75,7 +124,7 @@ export const SunScrollIndicator: React.FC = () => {
           ? 'opacity-100'
           : 'opacity-75'
       }`}
-      aria-label={`نشانگر پیشرفت اسکرول: ${Math.round(scrollProgress)}٪. کلیک برای بازگشت به آغاز صفحه`}
+      aria-label="نشانگر پیشرفت اسکرول: ۰٪. کلیک برای بازگشت به آغاز صفحه"
     >
       {/* Desktop Vertical Sun Track Line (visual progress arc) */}
       <span
@@ -86,17 +135,17 @@ export const SunScrollIndicator: React.FC = () => {
         <span className="relative w-[2px] h-32 sm:h-36 bg-[var(--color-gold)]/25 rounded-full overflow-hidden block">
           {/* Filled progress portion */}
           <span
-            className="w-full bg-gradient-to-b from-[var(--color-sun)] via-[var(--color-gold)] to-[var(--color-maroon)] transition-all duration-150 ease-out block"
-            style={{ height: `${scrollProgress}%` }}
+            ref={progressFillRef}
+            className="w-full bg-gradient-to-b from-[var(--color-sun)] via-[var(--color-gold)] to-[var(--color-maroon)] block"
+            style={{ height: '0%' }}
           />
         </span>
 
         {/* Sliding Glowing Sun on the Line */}
         <span
-          className="absolute left-1/2 -translate-x-1/2 w-4 h-4 transition-all duration-150 ease-out flex items-center justify-center"
-          style={{
-            top: `calc(${scrollProgress}% - 8px)`,
-          }}
+          ref={progressSunRef}
+          className="absolute left-1/2 -translate-x-1/2 w-4 h-4 flex items-center justify-center"
+          style={{ top: 'calc(0% - 8px)' }}
         >
           {/* Sun glowing halo */}
           <span className="absolute inset-0 rounded-full bg-[var(--color-sun)] blur-[4px] opacity-70 animate-pulse" />
@@ -130,20 +179,18 @@ export const SunScrollIndicator: React.FC = () => {
             r={radius}
             stroke="var(--color-sun)"
             strokeWidth="2.5"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
+            strokeDasharray={`${circumference}`}
+            strokeDashoffset={circumference}
             strokeLinecap="round"
-            className="transition-all duration-150 ease-out"
+            ref={progressRingRef}
           />
         </svg>
 
         {/* Central Sun Icon — crossfades to up-chevron on hover */}
         <span
+          ref={sunRotationRef}
           className="relative flex items-center justify-center text-[var(--color-maroon)] group-hover:text-[var(--color-sun)] transition-colors duration-300"
-          style={{
-            transform: `rotate(${scrollProgress * 3.6}deg)`,
-            transition: 'transform 0.15s ease-out',
-          }}
+          style={{ transform: 'rotate(0deg)' }}
           aria-hidden="true"
         >
           <svg
@@ -176,7 +223,7 @@ export const SunScrollIndicator: React.FC = () => {
         </span>
 
         {/* Subtle ping badge near the bottom of the day */}
-        {scrollProgress > 95 && (
+        {isNearBottom && !isAtBottom && (
           <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[var(--color-sun)] ring-2 ring-[var(--color-cream)] animate-ping" />
         )}
       </span>
