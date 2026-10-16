@@ -73,7 +73,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, in
   return (
     <div
       ref={cardRef}
-      className="group relative flex flex-col rounded-t-[999px] rounded-b-[28px] bg-[var(--color-ink)] text-[var(--color-cream)] border border-[var(--color-gold)]/25 overflow-hidden shadow-xl transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-2 hover:border-[var(--color-gold)]/70 hover:shadow-[0_24px_60px_rgba(167,128,64,0.28)] will-change-transform"
+      className="group relative flex flex-col rounded-t-[999px] rounded-b-[28px] bg-[var(--color-ink)] text-[var(--color-cream)] border border-[var(--color-gold)]/25 overflow-hidden shadow-xl transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-2 hover:border-[var(--color-gold)]/70 hover:shadow-[0_24px_60px_rgba(167,128,64,0.28)]"
     >
       {/* Label panel — the product's face, arch-topped like the brand language */}
       <div className="relative aspect-[4/5] w-full overflow-hidden">

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronUp } from 'lucide-react';
-import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { prefersReducedMotion } from '../../lib/motion';
 
 /**
@@ -10,12 +9,11 @@ import { prefersReducedMotion } from '../../lib/motion';
  * is ONE interactive button that returns the visitor to the top of the page.
  * - Hover: sun icon crossfades into an up-chevron ("back to start" affordance)
  *   and a tooltip reveals the current day-phase & scroll percentage
- * - Click: smooth scroll to top (ScrollSmoother-aware, reduced-motion aware)
+ * - Click: smooth native scroll to top, with reduced-motion awareness
  * - The sliding sun on the track visualizes the day-to-night narrative arc
  */
 export const SunScrollIndicator: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isNearBottom, setIsNearBottom] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -24,7 +22,7 @@ export const SunScrollIndicator: React.FC = () => {
   const progressSunRef = useRef<HTMLSpanElement>(null);
   const progressRingRef = useRef<SVGCircleElement>(null);
   const sunRotationRef = useRef<HTMLSpanElement>(null);
-  const scrollFlagsRef = useRef({ isScrolled: false, isNearBottom: false, isAtBottom: false });
+  const scrollFlagsRef = useRef({ isScrolled: false, isAtBottom: false });
   const trackHeightRef = useRef(0);
 
   // SVG circle progress is written once per animation frame, without rerendering
@@ -73,16 +71,11 @@ export const SunScrollIndicator: React.FC = () => {
 
       const nextFlags = {
         isScrolled: window.scrollY > 120,
-        isNearBottom: progress > 95,
         isAtBottom: progress >= 96,
       };
       if (nextFlags.isScrolled !== scrollFlagsRef.current.isScrolled) {
         scrollFlagsRef.current.isScrolled = nextFlags.isScrolled;
         setIsScrolled(nextFlags.isScrolled);
-      }
-      if (nextFlags.isNearBottom !== scrollFlagsRef.current.isNearBottom) {
-        scrollFlagsRef.current.isNearBottom = nextFlags.isNearBottom;
-        setIsNearBottom(nextFlags.isNearBottom);
       }
       if (nextFlags.isAtBottom !== scrollFlagsRef.current.isAtBottom) {
         scrollFlagsRef.current.isAtBottom = nextFlags.isAtBottom;
@@ -105,15 +98,10 @@ export const SunScrollIndicator: React.FC = () => {
   }, [circumference]);
 
   const scrollToTop = () => {
-    const smoother = ScrollSmoother.get();
-    if (smoother) {
-      smoother.scrollTo(0, true);
-    } else {
-      window.scrollTo({
-        top: 0,
-        behavior: prefersReducedMotion() ? 'auto' : 'smooth',
-      });
-    }
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+    });
   };
 
   // Fade the dial out near the page bottom — the footer's TideLine takes over
@@ -130,7 +118,7 @@ export const SunScrollIndicator: React.FC = () => {
       onBlur={() => setShowTooltip(false)}
       tabIndex={isAtBottom ? -1 : 0}
       aria-hidden={isAtBottom}
-      className={`group fixed z-40 left-4 sm:left-7 bottom-6 flex flex-col items-center gap-3 select-none cursor-pointer rounded-3xl p-1.5 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-gold)] ${
+      className={`group fixed z-40 left-4 sm:left-7 bottom-6 flex flex-col items-center gap-3 select-none cursor-pointer rounded-3xl p-1.5 transition-[opacity,transform] duration-200 hover:-translate-y-0.5 active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-gold)] ${
         isAtBottom
           ? 'opacity-0 translate-y-3 pointer-events-none'
           : isScrolled
@@ -160,15 +148,13 @@ export const SunScrollIndicator: React.FC = () => {
           className="absolute left-1/2 -translate-x-1/2 w-4 h-4 flex items-center justify-center"
           style={{ top: '-8px', transform: 'translate3d(0, 0, 0)' }}
         >
-          {/* Sun glowing halo */}
-          <span className="absolute inset-0 rounded-full bg-[var(--color-sun)] blur-[4px] opacity-70 animate-pulse" />
           {/* Sun Core */}
           <span className="relative w-3 h-3 rounded-full bg-[var(--color-sun)] border border-[var(--color-cream-fixed)] shadow-[0_0_8px_rgba(253,183,22,0.9)]" />
         </span>
       </span>
 
       {/* Sun Dial & Progress Ring (primary click surface) */}
-      <span className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-[var(--color-cream)]/90 group-hover:bg-[var(--color-cream)] border border-[var(--color-gold)]/35 group-hover:border-[var(--color-sun)] shadow-md group-hover:shadow-xl group-hover:shadow-[var(--color-sun)]/20 transition-all duration-300 flex items-center justify-center backdrop-blur-md">
+        <span className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-[var(--color-cream)]/95 group-hover:bg-[var(--color-cream)] border border-[var(--color-gold)]/35 group-hover:border-[var(--color-sun)] shadow-md group-hover:shadow-xl group-hover:shadow-[var(--color-sun)]/20 transition-[background-color,border-color,box-shadow] duration-300 flex items-center justify-center">
         {/* SVG Circular Progress Track & Ring */}
         <svg
           className="absolute inset-0 w-full h-full -rotate-90 transform"
@@ -234,11 +220,6 @@ export const SunScrollIndicator: React.FC = () => {
             strokeWidth={2.5}
           />
         </span>
-
-        {/* Subtle ping badge near the bottom of the day */}
-        {isNearBottom && !isAtBottom && (
-          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[var(--color-sun)] ring-2 ring-[var(--color-cream)] animate-ping" />
-        )}
       </span>
     </button>
   );

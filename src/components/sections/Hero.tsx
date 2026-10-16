@@ -22,6 +22,8 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
   const sunRef = useRef<HTMLDivElement>(null);
   const archRef = useRef<HTMLDivElement>(null);
   const bottleRef = useRef<HTMLDivElement>(null);
+  const bottleFloatTweenRef = useRef<gsap.core.Tween | null>(null);
+  const heroVisibleRef = useRef(true);
   const wavePathRef = useRef<SVGPathElement>(null);
   const waveStrokeRef = useRef<SVGPathElement>(null);
   const secondaryWaveStrokeRef = useRef<SVGPathElement>(null);
@@ -240,7 +242,7 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
       }
 
       // 4. Idle levitation floating loop for hero bottle (gentle)
-      gsap.to(bottleRef.current, {
+      bottleFloatTweenRef.current = gsap.to(bottleRef.current, {
         y: -6,
         rotate: 0.6,
         duration: 3.6,
@@ -248,10 +250,12 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
         yoyo: true,
         ease: 'sine.inOut',
       });
+      if (!heroVisibleRef.current) bottleFloatTweenRef.current.pause();
 
       // 5. Interactive Magnetic Pointer Parallax (Desktop fine pointer only)
       if (window.matchMedia('(pointer: fine)').matches) {
         const handleMouseMove = (e: MouseEvent) => {
+          if (!heroVisibleRef.current) return;
           const { innerWidth, innerHeight } = window;
           const xFactor = (e.clientX / innerWidth - 0.5) * 2;
           const yFactor = (e.clientY / innerHeight - 0.5) * 2;
@@ -352,17 +356,44 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
       });
 
       // Subtle float
-      gsap.to(bottleRef.current, {
+      bottleFloatTweenRef.current = gsap.to(bottleRef.current, {
         y: -6,
         duration: 2.8,
         repeat: -1,
         yoyo: true,
         ease: 'sine.inOut',
       });
+      if (!heroVisibleRef.current) bottleFloatTweenRef.current.pause();
     });
 
-    return () => mm.revert();
+    return () => {
+      mm.revert();
+      bottleFloatTweenRef.current = null;
+    };
   }, [introReady]);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      section.classList.add('motion-visible');
+      return;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      const isVisible = Boolean(entry?.isIntersecting);
+      heroVisibleRef.current = isVisible;
+      section.classList.toggle('motion-visible', isVisible);
+      if (isVisible) {
+        bottleFloatTweenRef.current?.resume();
+      } else {
+        bottleFloatTweenRef.current?.pause();
+      }
+    });
+    observer.observe(section);
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section

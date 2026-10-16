@@ -13,7 +13,6 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { CustomEase } from 'gsap/CustomEase';
-import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { SplitText } from 'gsap/SplitText';
 import { Flip } from 'gsap/Flip';
@@ -26,7 +25,6 @@ export function registerMotionPlugins() {
   gsap.registerPlugin(
     ScrollTrigger,
     CustomEase,
-    ScrollSmoother,
     DrawSVGPlugin,
     SplitText,
     Flip

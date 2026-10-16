@@ -211,6 +211,22 @@ export const ProductMoment: React.FC = () => {
     };
   }, [applyScrollProgress]);
 
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      section.classList.add('motion-visible');
+      return;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      section.classList.toggle('motion-visible', Boolean(entry?.isIntersecting));
+    });
+    observer.observe(section);
+
+    return () => observer.disconnect();
+  }, []);
+
   // Jump to specific stage smoothly
   const jumpToStage = useCallback((stageIndex: number) => {
     const trigger = scrollTriggerInstance.current;

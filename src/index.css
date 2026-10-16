@@ -55,8 +55,7 @@ html[data-theme="dark"] {
   color-scheme: dark;
 }
 
-/* Smooth theme flip for page-level surfaces (element-level colors
-   switch instantly, which keeps GSAP/ScrollSmoother animations intact) */
+/* Smooth theme flip for page-level surfaces; element-level colors switch instantly. */
 html {
   font-family: 'Estedad', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--color-cream);
@@ -213,7 +212,11 @@ body {
 
 .bottle-bubble {
   animation: bottle-bubble 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  will-change: transform, opacity;
+  animation-play-state: paused;
+}
+
+.group:hover .bottle-bubble {
+  animation-play-state: running;
 }
 
 /* Glass shine sweep across the hero bottle — masked to the bottle silhouette
@@ -256,6 +259,27 @@ body {
   will-change: opacity;
 }
 
+#hero .bottle-shine,
+#hero .bottle-edge-glow {
+  animation-play-state: paused;
+}
+
+#hero.motion-visible .bottle-shine,
+#hero.motion-visible .bottle-edge-glow {
+  animation-play-state: running;
+}
+
+/* Keep decorative product-stage pulses idle after the pinned section leaves view. */
+#product:not(.motion-visible) .animate-pulse,
+#product:not(.motion-visible) .sun-dot-pulse {
+  animation-play-state: paused;
+}
+
+#product.motion-visible .animate-pulse,
+#product.motion-visible .sun-dot-pulse {
+  animation-play-state: running;
+}
+
 @keyframes glass-edge {
   0%, 100% { opacity: 0.55; }
   50%      { opacity: 1; }
@@ -269,6 +293,20 @@ body {
   100% {
     transform: translate3d(50%, 0, 0);
   }
+}
+
+/* Let the ticker run only while it is visible; keep its existing pause-on-hover affordance. */
+.marquee-track {
+  animation-play-state: paused;
+}
+
+.marquee-section.motion-visible .marquee-track {
+  animation-play-state: running;
+}
+
+.marquee-section.motion-visible .marquee-track:hover,
+.marquee-section.motion-visible .marquee-track:focus-within {
+  animation-play-state: paused;
 }
 
 /* Strict reduced motion fallback */

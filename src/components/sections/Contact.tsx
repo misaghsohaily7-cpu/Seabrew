@@ -1,85 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { registerMotionPlugins, prefersReducedMotion } from '../../lib/motion';
+import React, { useState } from 'react';
 import { siteContent } from '../../content';
 import { BrandButton } from '../ui/Button';
 import { SunDot } from '../ui/SunDot';
 
 export const Contact: React.FC = () => {
-  const sectionRef = useRef<HTMLElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const channelsRef = useRef<HTMLDivElement>(null);
-  const formRef = useRef<HTMLDivElement>(null);
-
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    registerMotionPlugins();
-    if (prefersReducedMotion()) return;
-
-    const ctx = gsap.context(() => {
-      if (headerRef.current) {
-        gsap.fromTo(
-          headerRef.current.children,
-          { opacity: 0, y: 36 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.42,
-            stagger: 0.06,
-            ease: 'tide',
-            scrollTrigger: {
-              trigger: headerRef.current,
-              start: 'top 96%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
-      }
-
-      if (channelsRef.current) {
-        gsap.fromTo(
-          channelsRef.current.children,
-          { opacity: 0, y: 24 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.42,
-            stagger: 0.05,
-            ease: 'tide',
-            scrollTrigger: {
-              trigger: channelsRef.current,
-              start: 'top 97%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
-      }
-
-      if (formRef.current) {
-        gsap.fromTo(
-          formRef.current,
-          { opacity: 0, y: 40 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.45,
-            ease: 'tide',
-            scrollTrigger: {
-              trigger: formRef.current,
-              start: 'top 96%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
-      }
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,14 +29,13 @@ ${message}
   return (
     <section
       id="contact"
-      ref={sectionRef}
       className="relative w-full bg-[#161617] text-[#FFFADE] py-28 px-[6vw] border-t border-[#A78040]/20 select-none"
       aria-label="بخش ارتباط و سفارش"
     >
       <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
         {/* Contact Info (RTL Start) */}
         <div className="lg:col-span-5 flex flex-col justify-between">
-          <div ref={headerRef}>
+          <div>
             <span className="text-xs font-bold uppercase tracking-widest text-[#A78040] mb-3 flex items-center gap-2">
               <SunDot size="sm" animate={false} />
               <span>{siteContent.contact.sectionTag}</span>
@@ -122,7 +49,7 @@ ${message}
           </div>
 
           {/* Direct channels */}
-          <div ref={channelsRef} className="space-y-4 pt-4 border-t border-[#A78040]/20">
+          <div className="space-y-4 pt-4 border-t border-[#A78040]/20">
             <a
               href={`https://wa.me/${siteContent.contact.direct.whatsapp.replace(/[^0-9]/g, '')}`}
               target="_blank"
@@ -155,7 +82,7 @@ ${message}
         </div>
 
         {/* Static Contact Form */}
-        <div ref={formRef} className="lg:col-span-7 bg-[#161617] rounded-3xl border border-[#A78040]/30 p-8 sm:p-10 shadow-2xl">
+        <div className="lg:col-span-7 bg-[#161617] rounded-3xl border border-[#A78040]/30 p-8 sm:p-10">
           {formSubmitted ? (
             <div className="py-12 text-center flex flex-col items-center">
               <SunDot size="lg" className="mb-4" />

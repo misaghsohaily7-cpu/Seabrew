@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { siteContent } from '../../content';
 
 interface MarqueeProps {
@@ -16,17 +16,37 @@ export const Marquee: React.FC<MarqueeProps> = ({
   bg = 'bg-transparent',
   textColor = 'text-[var(--color-gold)]',
 }) => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const text = `${siteContent.marquee} `;
   const repeated = Array(8).fill(text);
 
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      section.classList.add('motion-visible');
+      return;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      section.classList.toggle('motion-visible', Boolean(entry?.isIntersecting));
+    });
+    observer.observe(section);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div
-      className={`relative w-full overflow-hidden py-4 select-none ${bg} ${className}`}
+      ref={sectionRef}
+      className={`marquee-section relative w-full overflow-hidden py-4 select-none ${bg} ${className}`}
       role="region"
       aria-label="پیام امضای برند"
     >
       <div
-        className="flex whitespace-nowrap hover:[animation-play-state:paused] focus-within:[animation-play-state:paused]"
+        ref={trackRef}
+        className="marquee-track flex whitespace-nowrap"
         aria-hidden="true"
         style={{
           animation: 'marquee-rtl 36s linear infinite',

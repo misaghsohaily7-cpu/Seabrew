@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { siteContent } from '../../content';
 import { BrandButton } from './Button';
 import { SeaBrewLogo } from './SeaBrewLogo';
@@ -35,23 +34,13 @@ export const NavBar: React.FC = () => {
 
   const handleLinkClick = (id: string) => {
     setMobileMenuOpen(false);
-    const smoother = ScrollSmoother.get();
     const element = document.getElementById(id);
-    if (smoother && element) {
-      smoother.scrollTo(element, true, 'top top');
-    } else if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    element?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    const smoother = ScrollSmoother.get();
-    if (smoother) {
-      smoother.scrollTo(0, true);
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (

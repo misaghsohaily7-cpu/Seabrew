@@ -1,51 +1,16 @@
-import React, { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
+import React from 'react';
 import { ArrowUp } from 'lucide-react';
-import { registerMotionPlugins, prefersReducedMotion } from '../../lib/motion';
 import { siteContent } from '../../content';
 import { TideLine } from './TideLine';
 import { SeaBrewLogo } from './SeaBrewLogo';
 
 export const Footer: React.FC = () => {
-  const footerRef = useRef<HTMLElement>(null);
-  const lettersRef = useRef<(HTMLSpanElement | null)[]>([]);
-
-  // One-word brand mark, matching the bottle labels (SEABREW) — forced LTR
-  // so the letter-by-letter reveal never renders reversed under RTL page flow.
+  // Keep the footer wordmark static so reaching the page end never starts a
+  // second scroll-linked animation.
   const letters = ['S', 'E', 'A', 'B', 'R', 'E', 'W'];
-
-  useEffect(() => {
-    registerMotionPlugins();
-
-    if (prefersReducedMotion()) return;
-
-    const ctx = gsap.context(() => {
-      // Big wordmark rising letter by letter from masked container
-      const validLetters = lettersRef.current.filter(Boolean);
-      gsap.fromTo(
-        validLetters,
-        { yPercent: 120, opacity: 0 },
-        {
-          yPercent: 0,
-          opacity: 1,
-          duration: 0.32,
-          stagger: 0.035,
-          ease: 'tide',
-          scrollTrigger: {
-            trigger: footerRef.current,
-            start: 'top bottom',
-            once: true,
-          },
-        }
-      );
-    }, footerRef);
-
-    return () => ctx.revert();
-  }, []);
 
   return (
     <footer
-      ref={footerRef}
       className="relative w-full bg-[#161617] text-[#FFFADE] pt-16 pb-12 overflow-hidden border-t border-[#A78040]/30 select-none"
       aria-label="فوتر پایانی وبسایت"
     >
@@ -55,7 +20,7 @@ export const Footer: React.FC = () => {
           <TideLine trackScrollProgress={false} sunPosition={50} color="#A78040" sunColor="#FDB716" />
         </div>
 
-        {/* Large Wordmark Rising Letter-by-Letter with Logo Mark */}
+        {/* Static wordmark keeps the footer entrance motion-free. */}
         <div
           className="w-full flex flex-col items-center justify-center overflow-hidden py-4 my-4"
           aria-label="SEA BREW"
@@ -63,15 +28,8 @@ export const Footer: React.FC = () => {
           <SeaBrewLogo variant="mark-only" theme="light" size="lg" className="mb-4 opacity-90 hover:scale-105 transition-transform duration-300" />
           <div dir="ltr" className="font-black text-[clamp(3.5rem,14vw,11rem)] tracking-wider text-[#FFFADE] leading-none flex">
             {letters.map((char, idx) => (
-              <span key={idx} className="inline-block overflow-hidden">
-                <span
-                  ref={(el) => {
-                    lettersRef.current[idx] = el;
-                  }}
-                  className="inline-block will-change-transform"
-                >
-                  {char}
-                </span>
+              <span key={idx} className="inline-block">
+                {char}
               </span>
             ))}
           </div>
