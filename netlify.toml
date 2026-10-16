@@ -1,0 +1,24 @@
+# Netlify build configuration for SEA BREW
+# Static site — no server, no framework SSR.
+
+[build]
+  # Install deps and build the production bundle
+  command = "npm run build"
+  # Vite outputs the static site here
+  publish = "dist"
+
+[build.environment]
+  # Vite 6 requires Node 18+; 20 is a safe LTS
+  NODE_VERSION = "20"
+
+# Long-cache the hashed build assets (JS/CSS/images are content-hashed by Vite)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Always serve index.html for the root (single-page scroll site, no router)
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
