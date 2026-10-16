@@ -37,7 +37,8 @@ export const DustParticles: React.FC<DustParticlesProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animId: number;
+    let animId = 0;
+    let running = false;
     let width = (canvas.width = canvas.parentElement?.clientWidth || window.innerWidth);
     let height = (canvas.height = canvas.parentElement?.clientHeight || window.innerHeight);
 
@@ -136,7 +137,7 @@ export const DustParticles: React.FC<DustParticlesProps> = ({
         ctx.fillStyle = color;
         ctx.globalAlpha = currentAlpha;
         ctx.shadowColor = color;
-        ctx.shadowBlur = p.size * 3.5;
+        ctx.shadowBlur = p.size * 2.5;
         ctx.fill();
       }
 
@@ -146,10 +147,28 @@ export const DustParticles: React.FC<DustParticlesProps> = ({
       animId = requestAnimationFrame(render);
     };
 
-    animId = requestAnimationFrame(render);
+    // Only animate while the canvas is actually on screen — pausing off-screen
+    // keeps this per-frame canvas work from competing with the smooth-scroll transform.
+    const start = () => {
+      if (running) return;
+      running = true;
+      lastTime = performance.now();
+      animId = requestAnimationFrame(render);
+    };
+    const stop = () => {
+      running = false;
+      if (animId) cancelAnimationFrame(animId);
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => (entry.isIntersecting ? start() : stop()),
+      { threshold: 0.01 }
+    );
+    io.observe(canvas);
 
     return () => {
-      cancelAnimationFrame(animId);
+      io.disconnect();
+      stop();
       window.removeEventListener('resize', handleResize);
       if (interactive) {
         window.removeEventListener('mousemove', handleMouseMove);

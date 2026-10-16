@@ -382,7 +382,7 @@ export const ProductMoment: React.FC = () => {
 
             {/* Right: Rich Sensory Editorial Narrative Card */}
             <div className="w-full lg:w-1/2 flex flex-col justify-center max-w-xl z-20">
-              <div className="relative p-4 sm:p-8 rounded-3xl bg-[var(--color-cream)]/85 border border-[var(--color-gold)]/35 backdrop-blur-md shadow-lg">
+              <div className="relative p-4 sm:p-8 rounded-3xl bg-[var(--color-cream)]/85 border border-[var(--color-gold)]/35 shadow-lg">
                 {/* Step badge — follows the pour animation */}
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <span

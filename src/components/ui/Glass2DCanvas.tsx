@@ -37,10 +37,17 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
 
   const waveSpeedRef = useRef<number>(2.0);
 
-  // Animation loop for wave motion & progress lerp
+  // Animation loop for wave motion & progress lerp.
+  // Paused via IntersectionObserver so it only runs while the glass is actually
+  // on screen — this stops a 60fps full-SVG re-render from competing with the
+  // page scroll while the user is elsewhere on the site (a major jank source).
   useEffect(() => {
-    let animId: number;
+    const container = containerRef.current;
+    if (!container) return;
+
+    let animId = 0;
     let lastTime = performance.now();
+    let running = false;
 
     const loop = (now: number) => {
       const dt = Math.min((now - lastTime) / 1000, 0.1);
@@ -65,8 +72,28 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
       animId = requestAnimationFrame(loop);
     };
 
-    animId = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(animId);
+    const start = () => {
+      if (running) return;
+      running = true;
+      lastTime = performance.now();
+      animId = requestAnimationFrame(loop);
+    };
+
+    const stop = () => {
+      running = false;
+      if (animId) cancelAnimationFrame(animId);
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => (entry.isIntersecting ? start() : stop()),
+      { threshold: 0.01 }
+    );
+    io.observe(container);
+
+    return () => {
+      io.disconnect();
+      stop();
+    };
   }, [isPouring]);
 
   // Mouse / Pointer Parallax handler

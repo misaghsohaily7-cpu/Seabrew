@@ -40,6 +40,7 @@ export default function App() {
       smooth: 1.3,
       effects: true,
       smoothTouch: 0.1,
+      ignoreMobileResize: true,
     });
 
     return () => {
