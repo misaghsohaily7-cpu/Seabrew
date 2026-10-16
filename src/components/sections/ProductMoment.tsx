@@ -62,14 +62,14 @@ export const ProductMoment: React.FC = () => {
   const glassGlossRef = useRef<HTMLDivElement>(null);
   const glassBackRef = useRef<SVGSVGElement>(null);
 
-  // Progressive states
-  const [scrollPercent, setScrollPercent] = useState<number>(() =>
-    prefersReducedMotion() ? 0.92 : 0.12
-  );
-  const [activeStageIndex, setActiveStageIndex] = useState<number>(() =>
-    prefersReducedMotion() ? 3 : 0
-  );
-  const [isPouringStream, setIsPouringStream] = useState<boolean>(false);
+  // Scroll values live in refs so the pinned scene doesn't rerender React on every scroll frame.
+  const initialProgress = prefersReducedMotion() ? 0.92 : 0.12;
+  const glassMotionRef = useRef({ progress: initialProgress, isPouring: false });
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const activeStageIndexRef = useRef(prefersReducedMotion() ? 3 : 0);
+  const isReadyRef = useRef(initialProgress >= 0.88);
+  const [activeStageIndex, setActiveStageIndex] = useState<number>(activeStageIndexRef.current);
+  const [isReady, setIsReady] = useState<boolean>(isReadyRef.current);
   // Which product's recipe the anatomy section follows (tab selection)
   const [activeProduct, setActiveProduct] = useState<number>(0);
   const activeProductData = siteContent.productList[activeProduct];
@@ -142,7 +142,29 @@ export const ProductMoment: React.FC = () => {
     };
   }, []);
 
-  // Synchronized GSAP ScrollTrigger with long, deliberate scroll distance
+  const applyScrollProgress = useCallback((self: ScrollTrigger) => {
+    const progress = Math.max(0.08, Math.min(0.98, self.progress * 0.9 + 0.08));
+    glassMotionRef.current.progress = progress;
+    glassMotionRef.current.isPouring = self.direction > 0 && progress > 0.18 && progress < 0.94;
+
+    if (progressBarRef.current) {
+      progressBarRef.current.style.width = `${Math.round(progress * 100)}%`;
+    }
+
+    const nextStage = progress < 0.32 ? 0 : progress < 0.62 ? 1 : progress < 0.78 ? 2 : 3;
+    if (nextStage !== activeStageIndexRef.current) {
+      activeStageIndexRef.current = nextStage;
+      setActiveStageIndex(nextStage);
+    }
+
+    const ready = progress >= 0.88;
+    if (ready !== isReadyRef.current) {
+      isReadyRef.current = ready;
+      setIsReady(ready);
+    }
+  }, []);
+
+  // Synchronized GSAP ScrollTrigger with a shorter, responsive mobile timeline.
   useEffect(() => {
     registerMotionPlugins();
 
@@ -157,18 +179,9 @@ export const ProductMoment: React.FC = () => {
         end: '+=2600',
         pin: pinContainerRef.current,
         anticipatePin: 1,
-        scrub: 1.2,
+        scrub: 0.6,
         invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          const p = Math.max(0.08, Math.min(0.98, self.progress * 0.9 + 0.08));
-          setScrollPercent(p);
-          setIsPouringStream(self.direction > 0 && p > 0.18 && p < 0.94);
-
-          if (p < 0.32) setActiveStageIndex(0);
-          else if (p < 0.62) setActiveStageIndex(1);
-          else if (p < 0.78) setActiveStageIndex(2);
-          else setActiveStageIndex(3);
-        },
+        onUpdate: applyScrollProgress,
       });
 
       scrollTriggerInstance.current = trigger;
@@ -178,21 +191,12 @@ export const ProductMoment: React.FC = () => {
       const trigger = ScrollTrigger.create({
         trigger: sectionRef.current,
         start: 'top top',
-        end: '+=1600',
+        end: '+=960',
         pin: pinContainerRef.current,
         anticipatePin: 1,
-        scrub: 1.0,
+        scrub: 0.25,
         invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          const p = Math.max(0.08, Math.min(0.98, self.progress * 0.9 + 0.08));
-          setScrollPercent(p);
-          setIsPouringStream(self.direction > 0 && p > 0.18 && p < 0.94);
-
-          if (p < 0.32) setActiveStageIndex(0);
-          else if (p < 0.62) setActiveStageIndex(1);
-          else if (p < 0.78) setActiveStageIndex(2);
-          else setActiveStageIndex(3);
-        },
+        onUpdate: applyScrollProgress,
       });
 
       scrollTriggerInstance.current = trigger;
@@ -205,7 +209,7 @@ export const ProductMoment: React.FC = () => {
       mm.revert();
       scrollTriggerInstance.current = null;
     };
-  }, []);
+  }, [applyScrollProgress]);
 
   // Jump to specific stage smoothly
   const jumpToStage = useCallback((stageIndex: number) => {
@@ -245,7 +249,7 @@ export const ProductMoment: React.FC = () => {
       {/* Pinned Viewport Container */}
       <div
         ref={pinContainerRef}
-        className="w-full h-screen min-h-[640px] flex flex-col justify-between py-6 sm:py-8 px-[6vw] overflow-hidden"
+        className="product-moment-pin w-full flex flex-col justify-between px-[6vw] overflow-hidden"
       >
         <div className="max-w-[1400px] w-full mx-auto flex-1 flex flex-col justify-between">
           {/* Top Bar: Section Badge & Stage Progress Tracker */}
@@ -324,11 +328,11 @@ export const ProductMoment: React.FC = () => {
           </header>
 
           {/* Main Interactive Stage: 3D WebGL Tumbler (Center) + Rich Stage Card (Side) */}
-          <div className="flex-1 my-2 lg:my-4 flex flex-col lg:flex-row items-center justify-between gap-2 lg:gap-12 min-h-0">
+          <div className="product-moment-main flex-1 my-2 lg:my-4 flex flex-col lg:flex-row items-center justify-between gap-2 lg:gap-12 min-h-0">
             {/* Center-Left: Real 3D Tumbler Glass (Three.js WebGL with Buoyancy & Physics) */}
             <div
               ref={stageRef}
-              className="relative w-full lg:w-1/2 flex-1 min-h-[240px] sm:flex-none sm:h-[340px] lg:h-[480px] flex items-center justify-center [perspective:1200px]"
+              className="product-moment-stage relative w-full lg:w-1/2 flex-1 min-h-[240px] sm:flex-none sm:h-[340px] lg:h-[480px] flex items-center justify-center [perspective:1200px]"
               style={{ transformStyle: 'preserve-3d' }}
             >
               {/* Decorative Authentic Motif from Bushehr Windows (depth layer, behind) */}
@@ -356,8 +360,7 @@ export const ProductMoment: React.FC = () => {
                 style={{ transformStyle: 'preserve-3d', willChange: 'transform' }}
               >
                 <Glass2DCanvas
-                  progress={scrollPercent}
-                  isPouring={isPouringStream}
+                  motionRef={glassMotionRef}
                   tint={activeProductData.accent}
                   recipe={activeProductData.id}
                   className="w-full h-full"
@@ -382,7 +385,7 @@ export const ProductMoment: React.FC = () => {
 
             {/* Right: Rich Sensory Editorial Narrative Card */}
             <div className="w-full lg:w-1/2 flex flex-col justify-center max-w-xl z-20">
-              <div className="relative p-4 sm:p-8 rounded-3xl bg-[var(--color-cream)]/85 border border-[var(--color-gold)]/35 shadow-lg">
+              <div className="product-moment-stage-card relative p-4 sm:p-8 rounded-3xl bg-[var(--color-cream)]/85 border border-[var(--color-gold)]/35 shadow-lg">
                 {/* Step badge — follows the pour animation */}
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <span
@@ -413,7 +416,7 @@ export const ProductMoment: React.FC = () => {
                   <SunDot size="sm" animate={false} />
                   <span>{activeStep.title}</span>
                 </p>
-                <p className="text-xs sm:text-sm leading-relaxed font-medium text-[var(--color-ink)]/80 mb-5 min-h-[3.5rem]">
+                <p className="product-moment-step-lead text-xs sm:text-sm leading-relaxed font-medium text-[var(--color-ink)]/80 mb-5 min-h-[3.5rem]">
                   {activeStep.lead}
                 </p>
 
@@ -426,7 +429,7 @@ export const ProductMoment: React.FC = () => {
                     />
                     <span>ترکیبات {activeProductData.name}</span>
                   </div>
-                  <div key={activeProductData.id} className="flex flex-wrap gap-2 min-h-[3.5rem]">
+                  <div key={activeProductData.id} className="product-moment-ingredients flex flex-wrap gap-2 min-h-[3.5rem]">
                     {activeProductData.ingredients.map((ing, i) => (
                       <span
                         key={i}
@@ -446,9 +449,9 @@ export const ProductMoment: React.FC = () => {
               {/* Bottom Scroll Cue Helper */}
               <div className="mt-4 flex items-center justify-between text-xs font-medium text-[var(--color-maroon)]">
                 <div className="flex items-center gap-2">
-                  <SunDot size="sm" animate={scrollPercent >= 0.88} />
+                  <SunDot size="sm" animate={isReady} />
                   <span>
-                    {scrollPercent >= 0.88
+                    {isReady
                       ? 'نوشیدنی آماده است'
                       : 'برای دیدن مرحلهٔ بعد اسکرول کنید'}
                   </span>
@@ -456,8 +459,9 @@ export const ProductMoment: React.FC = () => {
 
                 <div className="w-32 h-1.5 bg-[var(--color-dust)]/40 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[var(--color-maroon)] transition-all duration-100 ease-out"
-                    style={{ width: `${Math.round(scrollPercent * 100)}%` }}
+                    ref={progressBarRef}
+                    className="h-full bg-[var(--color-maroon)]"
+                    style={{ width: `${Math.round(initialProgress * 100)}%` }}
                   />
                 </div>
               </div>
@@ -465,7 +469,7 @@ export const ProductMoment: React.FC = () => {
           </div>
 
           {/* Footer Bar: Authentic Attribution */}
-          <footer className="flex items-center justify-center border-t border-[var(--color-gold)]/20 pt-3 text-[11px] font-semibold text-[var(--color-maroon)]/80">
+          <footer className="product-moment-footer flex items-center justify-center border-t border-[var(--color-gold)]/20 pt-3 text-[11px] font-semibold text-[var(--color-maroon)]/80">
             <span>فرمول اختصاصی دم‌آوری سرد • SEA BREW</span>
           </footer>
         </div>

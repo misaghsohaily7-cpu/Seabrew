@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { gsap } from 'gsap';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { Preloader } from './components/ui/Preloader';
 import { CustomCursor } from './components/ui/Cursor';
@@ -33,19 +34,22 @@ export default function App() {
 
     if (prefersReducedMotion()) return;
 
-    // Initialize ScrollSmoother for inertial smooth page scrolling
-    const smoother = ScrollSmoother.create({
-      wrapper: '#smooth-wrapper',
-      content: '#smooth-content',
-      smooth: 1.3,
-      effects: true,
-      smoothTouch: 0.1,
-      ignoreMobileResize: true,
+    // Keep native touch scrolling on phones; use a lighter smoother on desktop.
+    const mm = gsap.matchMedia();
+
+    mm.add('(min-width: 768px) and (hover: hover) and (pointer: fine)', () => {
+      const smoother = ScrollSmoother.create({
+        wrapper: '#smooth-wrapper',
+        content: '#smooth-content',
+        smooth: 0.8,
+        effects: true,
+        ignoreMobileResize: true,
+      });
+
+      return () => smoother.kill();
     });
 
-    return () => {
-      smoother.kill();
-    };
+    return () => mm.revert();
   }, []);
 
   return (

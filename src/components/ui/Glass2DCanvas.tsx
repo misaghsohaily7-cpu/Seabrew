@@ -1,9 +1,12 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { getReducedMotionPreference } from '../../lib/motion';
 
+const BOTTOM_INNER_Y = 388;
+const TOP_MAX_Y = 115;
+const FILLABLE_HEIGHT = BOTTOM_INNER_Y - TOP_MAX_Y;
+
 interface Glass2DCanvasProps {
-  progress: number; // 0.08 to 0.96
-  isPouring?: boolean;
+  motionRef: React.MutableRefObject<{ progress: number; isPouring: boolean }>;
   className?: string;
   /** Product accent colour — tints the drink so each recipe looks different */
   tint?: string;
@@ -11,122 +14,45 @@ interface Glass2DCanvasProps {
   recipe?: string;
 }
 
-export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
-  progress,
-  isPouring = false,
+const Glass2DCanvasView: React.FC<Glass2DCanvasProps> = ({
+  motionRef,
   className = '',
   tint = '#C95F24',
   recipe = 'vigor',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const liquidBodyRef = useRef<SVGPathElement>(null);
+  const meniscusRef = useRef<SVGPathElement>(null);
+  const tintRef = useRef<SVGRectElement>(null);
+  const bubble1Ref = useRef<SVGCircleElement>(null);
+  const bubble2Ref = useRef<SVGCircleElement>(null);
+  const bubble3Ref = useRef<SVGCircleElement>(null);
+  const bubble4Ref = useRef<SVGCircleElement>(null);
+  const ice1Ref = useRef<SVGGElement>(null);
+  const ice2Ref = useRef<SVGGElement>(null);
+  const ice3Ref = useRef<SVGGElement>(null);
+  const ingredientRef = useRef<SVGGElement>(null);
+  const bean1Ref = useRef<SVGGElement>(null);
+  const bean2Ref = useRef<SVGGElement>(null);
+  const puddleRef = useRef<SVGEllipseElement>(null);
+  const rippleRef = useRef<SVGGElement>(null);
+  const rippleSurface1Ref = useRef<SVGEllipseElement>(null);
+  const rippleSurface2Ref = useRef<SVGEllipseElement>(null);
+  const dropletRefs = useRef<Array<SVGCircleElement | null>>([]);
 
-  // Smooth lerp progress for buttery animation
-  const [smoothProgress, setSmoothProgress] = useState<number>(progress);
-  const targetProgressRef = useRef<number>(progress);
+  // Initial values are rendered immediately; the visible SVG is then updated
+  // in place so scroll and wave animation never trigger a React tree render.
+  const initialProgress = Math.max(0.06, Math.min(0.96, motionRef.current.progress));
+  const initialPouring = motionRef.current.isPouring;
+  const isReduced = getReducedMotionPreference();
 
-  useEffect(() => {
-    targetProgressRef.current = progress;
-  }, [progress]);
-
-  // Wave phase animation
-  const [wavePhase, setWavePhase] = useState<number>(0);
-
-  // Interactive tilt state
-  const [tilt, setTilt] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const isInteractingRef = useRef<boolean>(false);
-
-  const waveSpeedRef = useRef<number>(2.0);
-
-  // Animation loop for wave motion & progress lerp.
-  // Paused via IntersectionObserver so it only runs while the glass is actually
-  // on screen — this stops a 60fps full-SVG re-render from competing with the
-  // page scroll while the user is elsewhere on the site (a major jank source).
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    let animId = 0;
-    let lastTime = performance.now();
-    let running = false;
-
-    const loop = (now: number) => {
-      const dt = Math.min((now - lastTime) / 1000, 0.1);
-      lastTime = now;
-
-      const isReduced = getReducedMotionPreference();
-
-      // Smooth progress lerp
-      setSmoothProgress((prev) => {
-        const diff = targetProgressRef.current - prev;
-        if (Math.abs(diff) < 0.001) return targetProgressRef.current;
-        return prev + diff * (isReduced ? 0.3 : 0.15);
-      });
-
-      // Advance wave phase — the speed itself is eased so pouring never jolts
-      if (!isReduced) {
-        const targetSpeed = isPouring ? 4.5 : 2.0;
-        waveSpeedRef.current += (targetSpeed - waveSpeedRef.current) * Math.min(1, dt * 2.2);
-        setWavePhase((prev) => (prev + dt * waveSpeedRef.current) % (Math.PI * 2));
-      }
-
-      animId = requestAnimationFrame(loop);
-    };
-
-    const start = () => {
-      if (running) return;
-      running = true;
-      lastTime = performance.now();
-      animId = requestAnimationFrame(loop);
-    };
-
-    const stop = () => {
-      running = false;
-      if (animId) cancelAnimationFrame(animId);
-    };
-
-    const io = new IntersectionObserver(
-      ([entry]) => (entry.isIntersecting ? start() : stop()),
-      { threshold: 0.01 }
-    );
-    io.observe(container);
-
-    return () => {
-      io.disconnect();
-      stop();
-    };
-  }, [isPouring]);
-
-  // Mouse / Pointer Parallax handler
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (getReducedMotionPreference()) return;
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const normX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-    const normY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-    setTilt({
-      x: Math.max(-10, Math.min(10, -normY * 9)),
-      y: Math.max(-12, Math.min(12, normX * 11)),
-    });
-  };
-
-  const handlePointerLeave = () => {
-    setTilt({ x: 0, y: 0 });
-    isInteractingRef.current = false;
-  };
-
-  // Dimensional Geometry constants (SVG coordinate space 360 x 480)
-  const BOTTOM_INNER_Y = 388;
-  const TOP_MAX_Y = 115;
-  const FILLABLE_HEIGHT = BOTTOM_INNER_Y - TOP_MAX_Y; // 273px
-
-  // Current liquid level Y coordinate
-  const p = Math.max(0.06, Math.min(0.96, smoothProgress));
+  const p = initialProgress;
   const liquidHeight = p * FILLABLE_HEIGHT;
   const liquidLevelY = BOTTOM_INNER_Y - liquidHeight;
 
-  // Wave amplitude based on pouring & motion
-  const isReduced = getReducedMotionPreference();
-  const waveAmp = isReduced ? 0 : isPouring ? 7 : 3.5;
+  // Initial wave position; animation frames update SVG attributes directly.
+  const wavePhase = 0;
+  const waveAmp = isReduced ? 0 : initialPouring ? 7 : 3.5;
   const waveOffset1 = Math.sin(wavePhase) * waveAmp;
   const waveOffset2 = Math.cos(wavePhase * 2) * waveAmp * 0.8;
 
@@ -142,31 +68,31 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
   const ice1RestY = 350;
   const ice1TargetY = Math.max(160, Math.min(ice1RestY, liquidLevelY + 30));
   const ice1T = Math.min(1, Math.max(0, (liquidHeight - 25) / 40));
-  const ice1Y = ice1RestY + (ice1TargetY - ice1RestY) * ice1T + Math.sin(wavePhase * 2) * 2.5 * ice1T;
-  const ice1Rot = -12 + Math.sin(wavePhase * 1) * 5 * ice1T;
+  const ice1Y = ice1RestY + (ice1TargetY - ice1RestY) * ice1T;
+  const ice1Rot = -12;
 
   const ice2RestY = 340;
   const ice2TargetY = Math.max(175, Math.min(ice2RestY, liquidLevelY + 50));
   const ice2T = Math.min(1, Math.max(0, (liquidHeight - 45) / 40));
-  const ice2Y = ice2RestY + (ice2TargetY - ice2RestY) * ice2T + Math.cos(wavePhase * 3) * 2.2 * ice2T;
-  const ice2Rot = 16 + Math.cos(wavePhase * 2) * 6 * ice2T;
+  const ice2Y = ice2RestY + (ice2TargetY - ice2RestY) * ice2T;
+  const ice2Rot = 16;
 
   const ice3RestY = 320;
   const ice3TargetY = Math.max(140, Math.min(ice3RestY, liquidLevelY + 22));
   const ice3T = Math.min(1, Math.max(0, (liquidHeight - 65) / 40));
-  const ice3Y = ice3RestY + (ice3TargetY - ice3RestY) * ice3T + Math.sin(wavePhase * 4 + 1) * 2.8 * ice3T;
-  const ice3Rot = 8 + Math.sin(wavePhase * 3 + 1) * 4 * ice3T;
+  const ice3Y = ice3RestY + (ice3TargetY - ice3RestY) * ice3T;
+  const ice3Rot = 8;
 
   // Floating Strawberry Slice
   const strawRestY = 345;
   const strawTargetY = Math.max(130, Math.min(strawRestY, liquidLevelY + 18));
   const strawT = Math.min(1, Math.max(0, (liquidHeight - 35) / 40));
-  const strawY = strawRestY + (strawTargetY - strawRestY) * strawT + Math.sin(wavePhase * 3 + 0.6) * 2 * strawT;
-  const strawRot = -18 + Math.sin(wavePhase * 2) * 6 * strawT;
+  const strawY = strawRestY + (strawTargetY - strawRestY) * strawT;
+  const strawRot = -18;
 
   // Floating Roasted Coffee Beans
-  const bean1Y = Math.max(180, Math.min(360, liquidLevelY + 80 + Math.sin(wavePhase) * 6));
-  const bean2Y = Math.max(200, Math.min(370, liquidLevelY + 115 + Math.cos(wavePhase * 2) * 7));
+  const bean1Y = Math.max(180, Math.min(360, liquidLevelY + 80));
+  const bean2Y = Math.max(200, Math.min(370, liquidLevelY + 115));
 
   // Condensation droplets: 28 droplets along glass outer profile
   const droplets = useMemo(() => {
@@ -220,24 +146,161 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
     return list;
   }, []);
 
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let animationId = 0;
+    let running = false;
+    let lastTime = performance.now();
+    let progress = Math.max(0.06, Math.min(0.96, motionRef.current.progress));
+    let phase = 0;
+    let waveSpeed = 2;
+
+    const setAttribute = (node: Element | null, name: string, value: number | string) => {
+      if (node) node.setAttribute(name, String(value));
+    };
+
+    const updateSvg = (currentProgress: number, wavePhase: number, pouring: boolean, reducedMotion: boolean) => {
+      const liquidHeight = currentProgress * FILLABLE_HEIGHT;
+      const levelY = BOTTOM_INNER_Y - liquidHeight;
+      const waveAmplitude = reducedMotion ? 0 : pouring ? 7 : 3.5;
+      const offset1 = Math.sin(wavePhase) * waveAmplitude;
+      const offset2 = Math.cos(wavePhase * 2) * waveAmplitude * 0.8;
+      const t = (BOTTOM_INNER_Y - levelY) / FILLABLE_HEIGHT;
+      const leftX = 118 - t * 32;
+      const rightX = 242 + t * 32;
+      const width = rightX - leftX;
+
+      const surface = `
+        M ${leftX - 4} ${levelY + offset1}
+        C ${leftX + width * 0.3} ${levelY + offset1 - 5},
+          ${leftX + width * 0.7} ${levelY + offset2 + 5},
+          ${rightX + 4} ${levelY + offset2}
+      `;
+
+      setAttribute(
+        liquidBodyRef.current,
+        'd',
+        `${surface} L 260 410 L 100 410 Z`
+      );
+      setAttribute(
+        meniscusRef.current,
+        'd',
+        `${surface}
+          C ${leftX + width * 0.7} ${levelY + offset2 + 4},
+            ${leftX + width * 0.3} ${levelY + offset1 + 4},
+            ${leftX - 4} ${levelY + offset1} Z`
+      );
+      setAttribute(tintRef.current, 'y', Math.max(0, levelY - 4));
+      setAttribute(tintRef.current, 'height', Math.max(0, 480 - (levelY - 4)));
+
+      setAttribute(bubble1Ref.current, 'cx', leftX + 12);
+      setAttribute(bubble1Ref.current, 'cy', levelY + offset1 + 1);
+      setAttribute(bubble2Ref.current, 'cx', leftX + 24);
+      setAttribute(bubble2Ref.current, 'cy', levelY + offset1 + 2);
+      setAttribute(bubble3Ref.current, 'cx', rightX - 16);
+      setAttribute(bubble3Ref.current, 'cy', levelY + offset2 + 1);
+      setAttribute(bubble4Ref.current, 'cx', rightX - 32);
+      setAttribute(bubble4Ref.current, 'cy', levelY + offset2 + 2);
+
+      const ice1T = Math.min(1, Math.max(0, (liquidHeight - 25) / 40));
+      const ice2T = Math.min(1, Math.max(0, (liquidHeight - 45) / 40));
+      const ice3T = Math.min(1, Math.max(0, (liquidHeight - 65) / 40));
+      const ice1Y = 350 + (Math.max(160, Math.min(350, levelY + 30)) - 350) * ice1T +
+        Math.sin(wavePhase * 2) * 2.5 * ice1T;
+      const ice2Y = 340 + (Math.max(175, Math.min(340, levelY + 50)) - 340) * ice2T +
+        Math.cos(wavePhase * 3) * 2.2 * ice2T;
+      const ice3Y = 320 + (Math.max(140, Math.min(320, levelY + 22)) - 320) * ice3T +
+        Math.sin(wavePhase * 4 + 1) * 2.8 * ice3T;
+
+      setAttribute(ice1Ref.current, 'transform',
+        `translate(142, ${ice1Y}) rotate(${-12 + Math.sin(wavePhase) * 5 * ice1T})`);
+      setAttribute(ice2Ref.current, 'transform',
+        `translate(210, ${ice2Y}) rotate(${16 + Math.cos(wavePhase * 2) * 6 * ice2T})`);
+      setAttribute(ice3Ref.current, 'transform',
+        `translate(178, ${ice3Y}) rotate(${8 + Math.sin(wavePhase * 3 + 1) * 4 * ice3T})`);
+
+      const strawT = Math.min(1, Math.max(0, (liquidHeight - 35) / 40));
+      const strawY = 345 + (Math.max(130, Math.min(345, levelY + 18)) - 345) * strawT +
+        Math.sin(wavePhase * 3 + 0.6) * 2 * strawT;
+      const strawRotation = -18 + Math.sin(wavePhase * 2) * 6 * strawT;
+      setAttribute(ingredientRef.current, 'transform',
+        `translate(195, ${strawY}) rotate(${strawRotation})`);
+
+      const bean1Y = Math.max(180, Math.min(360, levelY + 80 + Math.sin(wavePhase) * 6));
+      const bean2Y = Math.max(200, Math.min(370, levelY + 115 + Math.cos(wavePhase * 2) * 7));
+      setAttribute(bean1Ref.current, 'transform', `translate(135, ${bean1Y}) rotate(32)`);
+      setAttribute(bean2Ref.current, 'transform', `translate(225, ${bean2Y}) rotate(-24)`);
+
+      droplets.forEach((droplet, index) => {
+        const opacity = droplet.cy >= levelY - 10 ? droplet.opacity : 0;
+        const node = dropletRefs.current[index];
+        setAttribute(node, 'fill-opacity', opacity);
+        setAttribute(node, 'stroke-opacity', opacity * 0.8);
+      });
+
+      setAttribute(rippleRef.current, 'opacity', pouring ? 1 : 0);
+      setAttribute(rippleSurface1Ref.current, 'cy', levelY + offset1);
+      setAttribute(rippleSurface2Ref.current, 'cy', levelY + offset1);
+      if (puddleRef.current) {
+        puddleRef.current.style.opacity = String(0.75 + currentProgress * 0.25);
+      }
+    };
+
+    const loop = (now: number) => {
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+
+      const targetProgress = Math.max(0.06, Math.min(0.96, motionRef.current.progress));
+      const reducedMotion = getReducedMotionPreference();
+      const response = reducedMotion ? 1 : 1 - Math.exp(-dt * 15);
+      progress += (targetProgress - progress) * response;
+      if (Math.abs(targetProgress - progress) < 0.0005) progress = targetProgress;
+
+      const pouring = motionRef.current.isPouring && !reducedMotion;
+      if (!reducedMotion) {
+        const targetSpeed = pouring ? 4.5 : 2;
+        waveSpeed += (targetSpeed - waveSpeed) * Math.min(1, dt * 2.2);
+        phase = (phase + dt * waveSpeed) % (Math.PI * 2);
+      }
+
+      updateSvg(progress, phase, pouring, reducedMotion);
+      animationId = requestAnimationFrame(loop);
+    };
+
+    const start = () => {
+      if (running) return;
+      running = true;
+      lastTime = performance.now();
+      animationId = requestAnimationFrame(loop);
+    };
+
+    const stop = () => {
+      running = false;
+      if (animationId) cancelAnimationFrame(animationId);
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => (entry.isIntersecting ? start() : stop()),
+      { threshold: 0.01 }
+    );
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+      stop();
+    };
+  }, [motionRef, droplets]);
+
   return (
     <div
       ref={containerRef}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-      className={`relative w-full h-full flex items-center justify-center select-none transition-transform duration-300 ease-out ${className}`}
-      style={{
-        perspective: '1000px',
-      }}
+      className={`relative w-full h-full flex items-center justify-center select-none ${className}`}
+      style={{ perspective: '1000px' }}
       aria-label="پیاله شیشه‌ای بلورین نوشیدنی SEA BREW"
     >
-      <div
-        className="relative w-full h-full max-w-[380px] max-h-[480px] flex items-center justify-center transition-transform duration-200 ease-out"
-        style={{
-          transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-          transformStyle: 'preserve-3d',
-        }}
-      >
+      <div className="relative w-full h-full max-w-[380px] max-h-[480px] flex items-center justify-center">
         <svg
           viewBox="0 0 360 480"
           className="w-full h-full drop-shadow-2xl overflow-visible"
@@ -324,13 +387,13 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
 
           {/* LAYER 0: Ambient Contact Shadow & Golden Caustic Halo on Table Surface */}
           <ellipse
+            ref={puddleRef}
             cx="180"
             cy="428"
             rx="110"
             ry="24"
             fill="url(#caustic-pool)"
             filter="blur(10px)"
-            className="transition-opacity duration-300"
             style={{ opacity: 0.75 + p * 0.25 }}
           />
           <ellipse
@@ -367,6 +430,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
             {/* Liquid Volume Body */}
             {/* Dynamic wave path hugging the bottom and curving at the surface */}
             <path
+              ref={liquidBodyRef}
               d={`
                 M ${currentLeftX - 4} ${liquidLevelY + waveOffset1}
                 C ${currentLeftX + currentWidth * 0.3} ${liquidLevelY + waveOffset1 - 5},
@@ -381,6 +445,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
 
             {/* Meniscus / Liquid Top Surface Wave Band */}
             <path
+              ref={meniscusRef}
               d={`
                 M ${currentLeftX - 4} ${liquidLevelY + waveOffset1}
                 C ${currentLeftX + currentWidth * 0.3} ${liquidLevelY + waveOffset1 - 5},
@@ -396,6 +461,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
 
             {/* Product tint wash — the drink takes the recipe's colour */}
             <rect
+              ref={tintRef}
               x="0"
               y={Math.max(0, liquidLevelY - 4)}
               width="360"
@@ -406,13 +472,13 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
             />
 
             {/* Micro Effervescence Bubbles at Meniscus Edge */}
-            <circle cx={currentLeftX + 12} cy={liquidLevelY + waveOffset1 + 1} r="1.6" fill="#fef08a" opacity="0.8" />
-            <circle cx={currentLeftX + 24} cy={liquidLevelY + waveOffset1 + 2} r="1.2" fill="#fef08a" opacity="0.6" />
-            <circle cx={currentRightX - 16} cy={liquidLevelY + waveOffset2 + 1} r="1.5" fill="#fef08a" opacity="0.75" />
-            <circle cx={currentRightX - 32} cy={liquidLevelY + waveOffset2 + 2} r="1.1" fill="#fef08a" opacity="0.55" />
+            <circle ref={bubble1Ref} cx={currentLeftX + 12} cy={liquidLevelY + waveOffset1 + 1} r="1.6" fill="#fef08a" opacity="0.8" />
+            <circle ref={bubble2Ref} cx={currentLeftX + 24} cy={liquidLevelY + waveOffset1 + 2} r="1.2" fill="#fef08a" opacity="0.6" />
+            <circle ref={bubble3Ref} cx={currentRightX - 16} cy={liquidLevelY + waveOffset2 + 1} r="1.5" fill="#fef08a" opacity="0.75" />
+            <circle ref={bubble4Ref} cx={currentRightX - 32} cy={liquidLevelY + waveOffset2 + 2} r="1.1" fill="#fef08a" opacity="0.55" />
 
             {/* ICE CUBE 1 (Left-Mid) */}
-            <g transform={`translate(142, ${ice1Y}) rotate(${ice1Rot})`}>
+            <g ref={ice1Ref} transform={`translate(142, ${ice1Y}) rotate(${ice1Rot})`}>
               {/* Drop shadow in fluid */}
               <rect x="-24" y="-20" width="48" height="42" rx="6" fill="#1e0e06" fillOpacity="0.4" />
               {/* Ice cube body */}
@@ -437,7 +503,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
             </g>
 
             {/* ICE CUBE 2 (Right-Low) */}
-            <g transform={`translate(210, ${ice2Y}) rotate(${ice2Rot})`}>
+            <g ref={ice2Ref} transform={`translate(210, ${ice2Y}) rotate(${ice2Rot})`}>
               <rect x="-22" y="-18" width="44" height="38" rx="5" fill="#1e0e06" fillOpacity="0.45" />
               <rect
                 x="-22"
@@ -457,7 +523,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
             </g>
 
             {/* ICE CUBE 3 (Center Top - Floating high) */}
-            <g transform={`translate(178, ${ice3Y}) rotate(${ice3Rot})`}>
+            <g ref={ice3Ref} transform={`translate(178, ${ice3Y}) rotate(${ice3Rot})`}>
               <rect x="-20" y="-18" width="40" height="36" rx="5" fill="#1e0e06" fillOpacity="0.35" />
               <rect
                 x="-20"
@@ -478,7 +544,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
 
             {/* Recipe ingredient — the tab decides what floats in the drink */}
             {recipe === 'bloom' && (
-              <g transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
+              <g ref={ingredientRef} transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
                 <path d="M -4 -3 C -9 -15, 1 -22, 10 -20" stroke="#4C7A3A" strokeWidth="1.7" fill="none" strokeLinecap="round" />
                 <path d="M 9 -2 C 10 -11, 12 -16, 10 -20" stroke="#4C7A3A" strokeWidth="1.4" fill="none" strokeLinecap="round" />
                 <circle cx="-8" cy="6" r="10" fill="#B01E42" stroke="#7A0F2A" strokeWidth="1.2" />
@@ -488,7 +554,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
             )}
 
             {recipe === 'apex' && (
-              <g transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
+              <g ref={ingredientRef} transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
                 <circle cx="0" cy="0" r="15" fill="#F0A83A" stroke="#C97B18" strokeWidth="1.4" />
                 <circle cx="0" cy="0" r="11" fill="#FFC96B" opacity="0.85" />
                 <path d="M 0 -11 L 0 11 M -11 0 L 11 0 M -8 -8 L 8 8 M 8 -8 L -8 8" stroke="#E08E22" strokeWidth="1.1" />
@@ -497,7 +563,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
             )}
 
             {recipe === 'focus' && (
-              <g transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
+              <g ref={ingredientRef} transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
                 <path d="M 0 -20 C 16 -12, 16 8, 0 20 C -16 8, -16 -12, 0 -20 Z" fill="#5F8C39" stroke="#3F6323" strokeWidth="1.3" />
                 <path d="M 0 -18 L 0 18" stroke="#9CCB6E" strokeWidth="1.2" />
                 <path d="M 0 -8 L 8 -2 M 0 2 L -8 8 M 0 -1 L 7 4" stroke="#9CCB6E" strokeWidth="0.9" />
@@ -505,7 +571,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
             )}
 
             {recipe === 'grace' && (
-              <g transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
+              <g ref={ingredientRef} transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
                 <circle cx="-9" cy="2" r="8" fill="#5B2A5E" stroke="#3A1740" strokeWidth="1.1" />
                 <circle cx="8" cy="-3" r="7.5" fill="#7C3A8E" stroke="#3A1740" strokeWidth="1.1" />
                 <circle cx="2" cy="10" r="7" fill="#4A1F55" stroke="#3A1740" strokeWidth="1.1" />
@@ -514,7 +580,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
             )}
 
             {recipe === 'haven' && (
-              <g transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
+              <g ref={ingredientRef} transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
                 <path d="M 0 -22 C 12 -10, 12 10, 0 22 C -12 10, -12 -10, 0 -22 Z" fill="#3E8C78" stroke="#245C4D" strokeWidth="1.3" />
                 <path d="M 0 -19 L 0 19" stroke="#9AD6C6" strokeWidth="1.1" />
                 <path d="M 0 -6 L 7 -1 M 0 4 L -7 9" stroke="#9AD6C6" strokeWidth="0.9" />
@@ -522,7 +588,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
             )}
 
             {recipe === 'vigor' && (
-              <g transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
+              <g ref={ingredientRef} transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
                 <ellipse cx="0" cy="0" rx="11" ry="15" fill="#241004" stroke="#451a03" strokeWidth="1.2" />
                 <path d="M 0 -12 C 4 -5 -4 5 0 12" stroke="#8A4310" strokeWidth="1.6" fill="none" />
                 <ellipse cx="-4" cy="-7" rx="2" ry="1.4" fill="#FFFFFF" opacity="0.18" />
@@ -530,21 +596,21 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
             )}
 
             {/* small recipe accents (same buoyancy as the hero ingredient) */}
-            <g transform={`translate(135, ${bean1Y}) rotate(32)`}>
+            <g ref={bean1Ref} transform={`translate(135, ${bean1Y}) rotate(32)`}>
               <ellipse cx="0" cy="0" rx="7.5" ry="10.5" fill={tint} stroke="#00000044" strokeWidth="1" />
               <ellipse cx="-2" cy="-4" rx="1.8" ry="1.2" fill="#FFFFFF" opacity="0.25" />
             </g>
-            <g transform={`translate(225, ${bean2Y}) rotate(-24)`}>
+            <g ref={bean2Ref} transform={`translate(225, ${bean2Y}) rotate(-24)`}>
               <ellipse cx="0" cy="0" rx="6.8" ry="9.6" fill={tint} stroke="#00000044" strokeWidth="1" />
               <ellipse cx="-2" cy="-3" rx="1.6" ry="1.1" fill="#FFFFFF" opacity="0.25" />
             </g>
           </g>
 
           {/* LAYER 3: POURING SURFACE RIPPLE (NO vertical stream line) */}
-          {isPouring && (
-            <g className="animate-pulse">
+          <g ref={rippleRef} aria-hidden="true" opacity={initialPouring ? 1 : 0}>
               {/* Gentle surface ripple rings only - zero vertical lines */}
               <ellipse
+                ref={rippleSurface1Ref}
                 cx="180"
                 cy={liquidLevelY + waveOffset1}
                 rx="18"
@@ -555,6 +621,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
                 opacity="0.8"
               />
               <ellipse
+                ref={rippleSurface2Ref}
                 cx="180"
                 cy={liquidLevelY + waveOffset1}
                 rx="28"
@@ -564,8 +631,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
                 strokeWidth="1"
                 opacity="0.5"
               />
-            </g>
-          )}
+          </g>
 
           {/* LAYER 4: GLASS SPECULAR REFLECTIONS & HIGHLIGHTS (Overlay above fluid) */}
           {/* Left Vertical High-Gloss Reflection Beam */}
@@ -599,6 +665,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
               return (
                 <circle
                   key={i}
+                  ref={(node) => { dropletRefs.current[i] = node; }}
                   cx={d.cx}
                   cy={d.cy}
                   r={d.r}
@@ -607,7 +674,6 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
                   stroke="#ffffff"
                   strokeWidth="0.5"
                   strokeOpacity={opacity * 0.8}
-                  className="transition-opacity duration-500"
                 />
               );
             })}
@@ -676,3 +742,5 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
     </div>
   );
 };
+
+export const Glass2DCanvas = React.memo(Glass2DCanvasView);
