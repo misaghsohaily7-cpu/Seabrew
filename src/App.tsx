@@ -41,8 +41,9 @@ export default function App() {
       const smoother = ScrollSmoother.create({
         wrapper: '#smooth-wrapper',
         content: '#smooth-content',
-        smooth: 0.8,
-        effects: true,
+        // Keep desktop wheel scrolling responsive; the longer easing made
+        // the final sections feel like they were catching up with the wheel.
+        smooth: 0.5,
         ignoreMobileResize: true,
       });
 
@@ -65,7 +66,7 @@ export default function App() {
 
       {/* 4. Smooth Scrolling Container */}
       <div id="smooth-wrapper" className="w-full overflow-hidden">
-        <div id="smooth-content" className="w-full will-change-transform">
+        <div id="smooth-content" className="w-full">
           {/* Main Page Structure — Chronological Narrative: Hero -> Products -> Anatomy -> Story */}
           <main id="main-content" role="main">
             {/* Section 1: Hero (Morning light, cream) */}

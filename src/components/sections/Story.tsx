@@ -17,7 +17,8 @@ export const Story: React.FC = () => {
 
     const mm = gsap.matchMedia(sectionRef);
 
-    // Desktop: Architectural ellipse clip-path scrub, night overlay, staggered scale
+    // Desktop: keep the day-to-night transition tied directly to scroll. Numeric
+    // scrub smoothing adds a visible catch-up delay on top of ScrollSmoother.
     mm.add('(min-width: 768px)', () => {
       if (headerRef.current) {
         gsap.fromTo(
@@ -69,7 +70,7 @@ export const Story: React.FC = () => {
               trigger: sectionRef.current,
               start: 'top 30%',
               end: 'bottom bottom',
-              scrub: 1.2,
+              scrub: true,
             },
           }
         );
@@ -79,18 +80,19 @@ export const Story: React.FC = () => {
         gsap.fromTo(
           darkTransitionPanelRef.current,
           {
-            clipPath: 'ellipse(120% 0% at 50% 100%)',
+            scaleY: 0,
             opacity: 0,
+            transformOrigin: '50% 100%',
           },
           {
-            clipPath: 'ellipse(120% 100% at 50% 100%)',
+            scaleY: 1,
             opacity: 1,
-            ease: 'pour',
+            ease: 'none',
             scrollTrigger: {
               trigger: darkTransitionPanelRef.current,
               start: 'top 95%',
               end: 'bottom bottom',
-              scrub: 1.2,
+              scrub: true,
             },
           }
         );
@@ -198,7 +200,7 @@ export const Story: React.FC = () => {
           {siteContent.story.chapters.map((chap, idx) => (
             <div
               key={chap.id}
-              className="relative rounded-t-[999px] rounded-b-[24px] bg-[#FFFADE]/85 backdrop-blur-xs border border-[#A78040]/30 p-8 pt-16 flex flex-col items-center text-center shadow-sm hover:border-[#A78040] hover:-translate-y-1 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+              className="relative rounded-t-[999px] rounded-b-[24px] bg-[#FFFADE]/90 border border-[#A78040]/30 p-8 pt-16 flex flex-col items-center text-center shadow-sm hover:border-[#A78040] hover:-translate-y-1 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
             >
               {/* Golden SVG linear motif */}
               <div className="mb-6 flex items-center justify-center h-16">
@@ -224,10 +226,10 @@ export const Story: React.FC = () => {
         </div>
       </div>
 
-      {/* Narrative Transition to Darkness: Full-width Ink Panel with Arch Clip-Path */}
+      {/* Narrative Transition to Darkness: transform-only arch reveal */}
       <div
         ref={darkTransitionPanelRef}
-        className="w-full h-36 md:h-48 bg-[#161617] will-change-transform"
+        className="w-full h-36 md:h-48 rounded-t-[50%] bg-[#161617]"
         aria-hidden="true"
       />
     </section>

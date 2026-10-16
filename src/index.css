@@ -62,18 +62,13 @@ html {
   background-color: var(--color-cream);
   color: var(--color-ink);
   direction: rtl;
-  scroll-behavior: smooth;
-  scroll-snap-type: y proximity;
   letter-spacing: normal !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.5s ease, color 0.5s ease;
 }
 
-/* Subtle magnetic snapping for narrative sections */
 section[id] {
-  scroll-snap-align: start;
-  scroll-snap-stop: normal;
   scroll-margin-top: 4.5rem;
 }
 
@@ -313,10 +308,6 @@ body {
 }
 
 @media (max-width: 767px) {
-  html {
-    scroll-snap-type: none;
-  }
-
   .product-moment-pin {
     height: 100svh;
     min-height: 0;

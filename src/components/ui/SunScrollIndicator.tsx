@@ -19,11 +19,13 @@ export const SunScrollIndicator: React.FC = () => {
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const progressTrackRef = useRef<HTMLSpanElement>(null);
   const progressFillRef = useRef<HTMLSpanElement>(null);
   const progressSunRef = useRef<HTMLSpanElement>(null);
   const progressRingRef = useRef<SVGCircleElement>(null);
   const sunRotationRef = useRef<HTMLSpanElement>(null);
   const scrollFlagsRef = useRef({ isScrolled: false, isNearBottom: false, isAtBottom: false });
+  const trackHeightRef = useRef(0);
 
   // SVG circle progress is written once per animation frame, without rerendering
   // the whole fixed widget for every native scroll event.
@@ -32,6 +34,14 @@ export const SunScrollIndicator: React.FC = () => {
 
   useEffect(() => {
     let frameId = 0;
+    const measureTrack = () => {
+      trackHeightRef.current = progressTrackRef.current?.clientHeight ?? 0;
+    };
+    measureTrack();
+    const resizeObserver = progressTrackRef.current
+      ? new ResizeObserver(measureTrack)
+      : null;
+    if (progressTrackRef.current) resizeObserver?.observe(progressTrackRef.current);
 
     const updateProgress = () => {
       frameId = 0;
@@ -41,10 +51,11 @@ export const SunScrollIndicator: React.FC = () => {
         : 0;
 
       if (progressFillRef.current) {
-        progressFillRef.current.style.height = `${progress}%`;
+        progressFillRef.current.style.transform = `scaleY(${progress / 100})`;
       }
       if (progressSunRef.current) {
-        progressSunRef.current.style.top = `calc(${progress}% - 8px)`;
+        const y = (progress / 100) * trackHeightRef.current - 8;
+        progressSunRef.current.style.transform = `translate3d(0, ${y}px, 0)`;
       }
       if (progressRingRef.current) {
         progressRingRef.current.style.strokeDashoffset = String(
@@ -54,10 +65,11 @@ export const SunScrollIndicator: React.FC = () => {
       if (sunRotationRef.current) {
         sunRotationRef.current.style.transform = `rotate(${progress * 3.6}deg)`;
       }
-      buttonRef.current?.setAttribute(
-        'aria-label',
-        `نشانگر پیشرفت اسکرول: ${Math.round(progress)}٪. کلیک برای بازگشت به آغاز صفحه`
-      );
+      const roundedProgress = Math.round(progress);
+      const buttonLabel = `نشانگر پیشرفت اسکرول: ${roundedProgress}٪. کلیک برای بازگشت به آغاز صفحه`;
+      if (buttonRef.current?.getAttribute('aria-label') !== buttonLabel) {
+        buttonRef.current?.setAttribute('aria-label', buttonLabel);
+      }
 
       const nextFlags = {
         isScrolled: window.scrollY > 120,
@@ -88,6 +100,7 @@ export const SunScrollIndicator: React.FC = () => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
       if (frameId) cancelAnimationFrame(frameId);
+      resizeObserver?.disconnect();
     };
   }, [circumference]);
 
@@ -132,12 +145,12 @@ export const SunScrollIndicator: React.FC = () => {
         aria-hidden="true"
       >
         {/* Track Line */}
-        <span className="relative w-[2px] h-32 sm:h-36 bg-[var(--color-gold)]/25 rounded-full overflow-hidden block">
+        <span ref={progressTrackRef} className="relative w-[2px] h-32 sm:h-36 bg-[var(--color-gold)]/25 rounded-full overflow-hidden block">
           {/* Filled progress portion */}
           <span
             ref={progressFillRef}
-            className="w-full bg-gradient-to-b from-[var(--color-sun)] via-[var(--color-gold)] to-[var(--color-maroon)] block"
-            style={{ height: '0%' }}
+            className="absolute inset-0 w-full origin-top bg-gradient-to-b from-[var(--color-sun)] via-[var(--color-gold)] to-[var(--color-maroon)]"
+            style={{ transform: 'scaleY(0)' }}
           />
         </span>
 
@@ -145,7 +158,7 @@ export const SunScrollIndicator: React.FC = () => {
         <span
           ref={progressSunRef}
           className="absolute left-1/2 -translate-x-1/2 w-4 h-4 flex items-center justify-center"
-          style={{ top: 'calc(0% - 8px)' }}
+          style={{ top: '-8px', transform: 'translate3d(0, 0, 0)' }}
         >
           {/* Sun glowing halo */}
           <span className="absolute inset-0 rounded-full bg-[var(--color-sun)] blur-[4px] opacity-70 animate-pulse" />
