@@ -28,12 +28,12 @@ export const Contact: React.FC = () => {
           {
             opacity: 1,
             y: 0,
-            duration: 0.95,
-            stagger: 0.16,
+            duration: 0.42,
+            stagger: 0.06,
             ease: 'tide',
             scrollTrigger: {
               trigger: headerRef.current,
-              start: 'top 85%',
+              start: 'top 96%',
               toggleActions: 'play none none reverse',
             },
           }
@@ -47,12 +47,12 @@ export const Contact: React.FC = () => {
           {
             opacity: 1,
             y: 0,
-            duration: 0.8,
-            stagger: 0.12,
+            duration: 0.42,
+            stagger: 0.05,
             ease: 'tide',
             scrollTrigger: {
               trigger: channelsRef.current,
-              start: 'top 90%',
+              start: 'top 97%',
               toggleActions: 'play none none reverse',
             },
           }
@@ -66,11 +66,11 @@ export const Contact: React.FC = () => {
           {
             opacity: 1,
             y: 0,
-            duration: 1.0,
+            duration: 0.45,
             ease: 'tide',
             scrollTrigger: {
               trigger: formRef.current,
-              start: 'top 85%',
+              start: 'top 96%',
               toggleActions: 'play none none reverse',
             },
           }
@@ -83,6 +83,18 @@ export const Contact: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Composes the message and hands it to the visitor's mail client, so it
+    // lands in the real inbox. (Swap this for a form endpoint such as
+    // Web3Forms/Formspree if server-side delivery is preferred.)
+    const subject = encodeURIComponent(`پیام تازه از سایت SEA BREW — ${name || 'بدون نام'}`);
+    const body = encodeURIComponent(
+      `نام: ${name}
+راه ارتباط: ${email}
+
+${message}
+`
+    );
+    window.location.href = `mailto:${siteContent.contact.direct.email}?subject=${subject}&body=${body}`;
     setFormSubmitted(true);
   };
 
@@ -111,26 +123,34 @@ export const Contact: React.FC = () => {
 
           {/* Direct channels */}
           <div ref={channelsRef} className="space-y-4 pt-4 border-t border-[#A78040]/20">
-            <div className="flex items-center justify-between text-sm py-2">
-              <span className="text-[#C9B8B6]">{siteContent.contact.direct.phoneLabel}</span>
-              <span dir="ltr" className="font-mono text-[#FFFADE] font-bold">
-                {siteContent.contact.direct.phone}
+            <a
+              href={`https://wa.me/${siteContent.contact.direct.whatsapp.replace(/[^0-9]/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center justify-between text-sm py-2"
+            >
+              <span className="text-[#C9B8B6] group-hover:text-[#FFFADE] transition-colors">
+                {siteContent.contact.direct.whatsappLabel}
               </span>
-            </div>
-
-            <div className="flex items-center justify-between text-sm py-2">
-              <span className="text-[#C9B8B6]">{siteContent.contact.direct.whatsappLabel}</span>
-              <span dir="ltr" className="font-mono text-[#FFFADE] font-bold">
+              <span dir="ltr" className="font-mono text-[#FFFADE] font-bold group-hover:text-[#A78040] transition-colors">
                 {siteContent.contact.direct.whatsapp}
               </span>
-            </div>
+            </a>
 
-            <div className="flex items-center justify-between text-sm py-2">
-              <span className="text-[#C9B8B6]">{siteContent.contact.direct.instagramLabel}</span>
-              <span dir="ltr" className="font-mono text-[#FFFADE] font-bold">
+            <a
+              href={`https://instagram.com/${siteContent.contact.direct.instagram}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center justify-between text-sm py-2"
+            >
+              <span className="text-[#C9B8B6] group-hover:text-[#FFFADE] transition-colors">
+                {siteContent.contact.direct.instagramLabel}
+              </span>
+              <span dir="ltr" className="font-mono text-[#FFFADE] font-bold group-hover:text-[#A78040] transition-colors">
                 {siteContent.contact.direct.instagram}
               </span>
-            </div>
+            </a>
+
           </div>
         </div>
 
@@ -219,9 +239,11 @@ export const Contact: React.FC = () => {
                   {siteContent.contact.form.submitLabel}
                 </BrandButton>
 
-                <p className="text-[0.75rem] text-[#C9B8B6]/70 text-center sm:text-start leading-snug">
-                  {siteContent.contact.form.notice}
-                </p>
+                {formSubmitted && (
+                  <p className="text-[0.75rem] text-[#A78040] text-center sm:text-start leading-snug">
+                    {siteContent.contact.form.successNote}
+                  </p>
+                )}
               </div>
             </form>
           )}

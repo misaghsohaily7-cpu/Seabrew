@@ -54,30 +54,30 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
       tl.fromTo(
         [titleLine1Ref.current, titleLine2Ref.current],
         { yPercent: 115, opacity: 0 },
-        { yPercent: 0, opacity: 1, duration: 1.1, stagger: 0.15 }
+        { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.07 }
       )
         .fromTo(
           subtitleRef.current,
           { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.8 },
+          { opacity: 1, y: 0, duration: 0.4 },
           '-=0.6'
         )
         .fromTo(
           sunRef.current,
           { scale: 0.4, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 1.0, ease: 'swell' },
+          { scale: 1, opacity: 1, duration: 0.45, ease: 'swell' },
           '-=0.7'
         )
         .fromTo(
           [archRef.current, bottleRef.current],
           { y: 50, opacity: 0 },
-          { y: 0, opacity: 1, duration: 1.0, stagger: 0.2 },
+          { y: 0, opacity: 1, duration: 0.45, stagger: 0.09 },
           '-=0.8'
         )
         .fromTo(
           [ctaContainerRef.current, draftNoteRef.current],
           { opacity: 0, y: 15 },
-          { opacity: 1, y: 0, duration: 0.7, stagger: 0.1 },
+          { opacity: 1, y: 0, duration: 0.35, stagger: 0.05 },
           '-=0.5'
         );
 
@@ -92,8 +92,8 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
           { drawSVG: '0%' },
           {
             drawSVG: '100%',
-            duration: 2.2,
-            stagger: 0.35,
+            duration: 1.4,
+            stagger: 0.2,
             ease: 'pour',
             scrollTrigger: {
               trigger: sectionRef.current,
@@ -186,12 +186,12 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
         scrollTl.to(
           bottleParallaxRef.current,
           {
-            y: -65,
-            z: 85,
-            rotateX: -7,
-            rotateY: 9,
-            rotateZ: 2,
-            scale: 1.05,
+            y: -8,
+            z: 10,
+            rotateX: -1,
+            rotateY: 1.2,
+            rotateZ: 0.3,
+            scale: 1.008,
           },
           0
         );
@@ -239,11 +239,11 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
         });
       }
 
-      // 4. Idle levitation floating loop for hero bottle
+      // 4. Idle levitation floating loop for hero bottle (gentle)
       gsap.to(bottleRef.current, {
-        y: -12,
-        rotate: 1.2,
-        duration: 3.2,
+        y: -6,
+        rotate: 0.6,
+        duration: 3.6,
         repeat: -1,
         yoyo: true,
         ease: 'sine.inOut',
@@ -257,33 +257,33 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
           const yFactor = (e.clientY / innerHeight - 0.5) * 2;
 
           gsap.to(sunRef.current, {
-            x: xFactor * 14,
-            y: yFactor * 10,
+            x: xFactor * 8,
+            y: yFactor * 6,
             duration: 1.2,
             ease: 'power2.out',
             overwrite: 'auto',
           });
           gsap.to(archRef.current, {
-            x: xFactor * -16,
-            y: yFactor * -12,
-            rotateY: xFactor * -4,
-            rotateX: yFactor * 3,
+            x: xFactor * -9,
+            y: yFactor * -7,
+            rotateY: xFactor * -2,
+            rotateX: yFactor * 1.5,
             duration: 1.2,
             ease: 'power2.out',
             overwrite: 'auto',
           });
           gsap.to(bottleRef.current, {
-            x: xFactor * 26,
-            rotateY: xFactor * 10,
-            rotateX: -yFactor * 8,
+            x: xFactor * 4,
+            rotateY: xFactor * 1.2,
+            rotateX: -yFactor * 0.8,
             duration: 1.2,
             ease: 'power2.out',
             overwrite: 'auto',
           });
           if (botanicalRef.current) {
             gsap.to(botanicalRef.current, {
-              x: xFactor * 16,
-              y: yFactor * 12,
+              x: xFactor * 8,
+              y: yFactor * 6,
               duration: 1.4,
               ease: 'power2.out',
               overwrite: 'auto',
@@ -307,16 +307,16 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
         .fromTo(
           [titleLine1Ref.current, titleLine2Ref.current],
           { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, duration: 0.8, stagger: 0.1 }
+          { opacity: 1, y: 0, duration: 0.4, stagger: 0.05 }
         )
-        .fromTo(subtitleRef.current, { opacity: 0 }, { opacity: 1, duration: 0.6 }, '-=0.4')
+        .fromTo(subtitleRef.current, { opacity: 0 }, { opacity: 1, duration: 0.35 }, '-=0.4')
         .fromTo(
           [archRef.current, bottleRef.current],
           { opacity: 0, scale: 0.95 },
-          { opacity: 1, scale: 1, duration: 0.8, stagger: 0.15 },
+          { opacity: 1, scale: 1, duration: 0.4, stagger: 0.07 },
           '-=0.5'
         )
-        .fromTo(ctaContainerRef.current, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.6 }, '-=0.3');
+        .fromTo(ctaContainerRef.current, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.35 }, '-=0.3');
 
       if (introReady) {
         mobileTl.play();
@@ -341,7 +341,7 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
 
       // Gentle vertical parallax on mobile (zero rotation or matrix tilt)
       gsap.to(bottleParallaxRef.current, {
-        y: -25,
+        y: -8,
         ease: 'none',
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -368,7 +368,7 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
     <section
       id="hero"
       ref={sectionRef}
-      className="relative min-h-[92vh] w-full bg-[#FFFADE] overflow-hidden flex flex-col justify-between pt-10 pb-4"
+      className="relative min-h-[92vh] w-full bg-[var(--color-cream)] overflow-hidden flex flex-col justify-between pt-10 pb-4"
       aria-label="بخش هیرو — معرفی SEA BREW"
     >
       {/* Background Ambience: Architectural Graphic Watermark & Subtle Arch Outline */}
@@ -377,20 +377,21 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
         className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-30 select-none overflow-hidden will-change-transform"
         aria-hidden="true"
       >
-        <div className="w-[600px] h-[850px] rounded-t-[999px] rounded-b-[32px] border border-[#A78040]/30" />
+        <div className="w-[600px] h-[850px] rounded-t-[999px] rounded-b-[32px] border border-[var(--color-gold)]/30" />
       </div>
 
       {/* Natural Tones Watermark Display Typography */}
       <div
         ref={watermarkRef}
-        className="absolute top-1/4 -start-16 opacity-[0.035] select-none pointer-events-none tracking-tight font-black text-[clamp(6rem,18vw,16rem)] text-[#161617] leading-none will-change-transform"
+        dir="ltr"
+        className="absolute top-1/4 -start-16 opacity-[0.035] select-none pointer-events-none tracking-tight font-black text-[clamp(6rem,18vw,16rem)] text-[var(--color-ink)] leading-none will-change-transform whitespace-nowrap"
         aria-hidden="true"
       >
-        WARM SEA
+        SEA BREW
       </div>
 
       {/* Ambient Coastal Dust Particles floating in sunbeams */}
-      <DustParticles count={36} color="#FDB716" className="opacity-60" />
+      <DustParticles count={36} color="var(--color-sun)" className="opacity-60" />
 
       {/* Main Grid: Typography on Right (RTL start), Bottle Visual on Left */}
       <div className="max-w-[1440px] mx-auto px-[6vw] w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center flex-1 my-auto">
@@ -400,15 +401,15 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
           <div className="flex items-center gap-3 mb-6">
             <span
               ref={subtitleRef}
-              className="text-[#825F27] text-xs font-bold tracking-widest uppercase px-3.5 py-1.5 border border-[#825F27] rounded-full inline-flex items-center gap-2"
+              className="text-[var(--color-maroon)] text-xs font-bold tracking-widest uppercase px-3.5 py-1.5 border border-[var(--color-maroon)] rounded-full inline-flex items-center gap-2"
             >
-              <InkCoffeeBranch className="w-4 h-4 text-[#A78040]" />
+              <InkCoffeeBranch className="w-4 h-4 text-[var(--color-gold)]" />
               <span>{siteContent.hero.subtitle}</span>
             </span>
           </div>
 
-          {/* Primary H1 Headline: clamp(3rem, 9vw, 8rem), Black weight */}
-          <h1 className="font-black text-[clamp(2.75rem,8vw,7.5rem)] leading-[1.1] text-[#161617] mb-6 tracking-normal">
+          {/* Primary H1 Headline */}
+          <h1 className="font-black text-[clamp(2rem,5.2vw,4.5rem)] leading-[1.3] text-[var(--color-ink)] mb-7 tracking-normal">
             <span className="block overflow-hidden pb-1">
               <span ref={titleLine1Ref} className="block will-change-transform">
                 {siteContent.hero.titleLine1}
@@ -429,28 +430,15 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
           {/* Draft main text note with client disclaimer */}
           <div
             ref={draftNoteRef}
-            className="mb-6 max-w-xl p-3.5 rounded-2xl bg-[#C9B8B6]/25 border border-[#A78040]/20 text-sm font-medium text-[#161617]/90 leading-relaxed"
+            className="mb-7 max-w-xl p-3.5 rounded-2xl bg-[var(--color-dust)]/25 border border-[var(--color-gold)]/20 text-sm font-medium text-[var(--color-ink)]/90 leading-relaxed"
           >
             {siteContent.hero.draftText}
-          </div>
-
-          {/* Natural Tones Craftsmanship Indicators */}
-          <div className="mb-8 flex items-center gap-8 sm:gap-12 select-none">
-            <div className="flex flex-col">
-              <span className="text-3xl sm:text-4xl font-bold text-[#A78040] tabular-nums leading-none">۰۱</span>
-              <span className="text-xs text-[#161617]/60 font-semibold mt-1">دم‌آوری سرد</span>
-            </div>
-            <div className="w-px h-10 bg-[#161617]/15" aria-hidden="true" />
-            <div className="flex flex-col">
-              <span className="text-3xl sm:text-4xl font-bold text-[#A78040] tabular-nums leading-none">۰۲</span>
-              <span className="text-xs text-[#161617]/60 font-semibold mt-1">صد در صد عربیکا</span>
-            </div>
           </div>
 
           {/* Call to action buttons */}
           <div
             ref={ctaContainerRef}
-            className="flex flex-wrap items-center gap-4 pt-2"
+            className="flex flex-wrap items-center gap-4"
           >
             <BrandButton
               variant="primary"
@@ -460,14 +448,6 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
             >
               {siteContent.hero.cta}
             </BrandButton>
-
-            <a
-              href="#statement"
-              className="px-6 py-3 text-sm font-bold text-[#825F27] hover:text-[#161617] transition-colors rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#161617]"
-              data-magnetic="true"
-            >
-              {siteContent.hero.scrollPrompt} ↓
-            </a>
           </div>
         </div>
 
@@ -485,7 +465,7 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
           >
             <path
               d="M50 10 Q60 40 90 50 Q60 60 50 90 Q40 60 10 50 Q40 40 50 10"
-              stroke="#A78040"
+              stroke="var(--color-gold)"
               strokeWidth="1.5"
               fill="none"
             />
@@ -498,7 +478,7 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
           >
             <div
               ref={sunRef}
-              className="w-48 h-48 sm:w-60 sm:h-60 rounded-full bg-[#FDB716] pointer-events-none will-change-transform"
+              className="w-48 h-48 sm:w-60 sm:h-60 rounded-full bg-[var(--color-sun)] pointer-events-none will-change-transform"
               style={{
                 boxShadow: '0 0 60px rgba(253, 183, 22, 0.45)',
               }}
@@ -509,7 +489,7 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
           {/* Natural Tones Offset Arch Shadow */}
           <div
             ref={shadowParallaxRef}
-            className="absolute w-64 sm:w-76 md:w-84 h-[440px] sm:h-[500px] rounded-t-[999px] rounded-b-[24px] bg-[#C9B8B6] opacity-25 transform translate-x-4 translate-y-4 pointer-events-none will-change-transform"
+            className="absolute w-64 sm:w-76 md:w-84 h-[440px] sm:h-[500px] rounded-t-[999px] rounded-b-[24px] bg-[var(--color-dust)] opacity-25 transform translate-x-4 translate-y-4 pointer-events-none will-change-transform"
             aria-hidden="true"
           />
 
@@ -521,11 +501,11 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
           >
             <div
               ref={archRef}
-              className="relative w-64 sm:w-76 md:w-84 h-[440px] sm:h-[500px] rounded-t-[999px] rounded-b-[24px] bg-[#C9B8B6] border-[10px] sm:border-[12px] border-white/35 shadow-2xl overflow-hidden backdrop-blur-none flex flex-col justify-end will-change-transform"
+              className="relative w-64 sm:w-76 md:w-84 h-[440px] sm:h-[500px] rounded-t-[999px] rounded-b-[24px] bg-[var(--color-dust)] border-[10px] sm:border-[12px] border-white/35 shadow-2xl overflow-hidden backdrop-blur-none flex flex-col justify-end will-change-transform"
             >
               {/* Subtle warm gradient sheen */}
               <div
-                className="absolute inset-0 bg-gradient-to-t from-[#825F27]/30 to-transparent pointer-events-none"
+                className="absolute inset-0 bg-gradient-to-t from-[var(--color-maroon)]/30 to-transparent pointer-events-none"
                 aria-hidden="true"
               />
 
@@ -541,7 +521,7 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
                 <path
                   ref={waveStrokeRef}
                   d="M 0 40 C 150 18, 300 58, 450 38 C 600 18, 750 52, 900 38"
-                  stroke="#A78040"
+                  stroke="var(--color-gold)"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   opacity="0.8"
@@ -549,7 +529,7 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
                 <path
                   ref={secondaryWaveStrokeRef}
                   d="M 0 55 C 160 35, 320 68, 480 48 C 640 28, 780 62, 900 50"
-                  stroke="#7FA096"
+                  stroke="var(--color-seaglass)"
                   strokeWidth="1.8"
                   strokeLinecap="round"
                   opacity="0.6"
@@ -557,7 +537,7 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
                 <path
                   ref={wavePathRef}
                   d="M 0 45 C 150 58, 300 32, 450 45 C 600 58, 750 32, 900 45 L 900 80 L 0 80 Z"
-                  fill="#7FA096"
+                  fill="var(--color-seaglass)"
                   opacity="0.3"
                 />
               </svg>
@@ -572,281 +552,28 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
           >
             <div
               ref={bottleRef}
-              className="w-44 sm:w-52 h-[380px] sm:h-[440px] flex items-center justify-center drop-shadow-2xl will-change-transform pointer-events-auto"
+              className="relative w-52 sm:w-60 md:w-64 h-[340px] sm:h-[400px] flex items-center justify-center drop-shadow-2xl will-change-transform pointer-events-auto"
               style={{ transformStyle: 'preserve-3d' }}
             >
-              <svg
-              viewBox="0 0 160 380"
-              className="w-full h-full"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              role="img"
-              aria-label="بطری نوشیدنی شیشه‌ای قهوه آماده مصرف SEA BREW با انعکاس‌های نوری سه‌بعدی"
-            >
-              <defs>
-                {/* Cold brew amber liquid gradient with deep 3D cylindrical lighting */}
-                <linearGradient id="coldBrewLiquid" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#140d08" />
-                  <stop offset="22%" stopColor="#2e1709" />
-                  <stop offset="48%" stopColor="#633b14" />
-                  <stop offset="72%" stopColor="#966122" />
-                  <stop offset="92%" stopColor="#2c160a" />
-                  <stop offset="100%" stopColor="#120b06" />
-                </linearGradient>
-
-                {/* Primary Animated Specular Beam Gradient */}
-                <linearGradient id="specularBeam" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#FFFADE" stopOpacity="0" />
-                  <stop offset="35%" stopColor="#FFFFFF" stopOpacity="0.45" />
-                  <stop offset="50%" stopColor="#FFFADE" stopOpacity="0.75" />
-                  <stop offset="65%" stopColor="#FDB716" stopOpacity="0.5" />
-                  <stop offset="100%" stopColor="#FFFADE" stopOpacity="0" />
-                </linearGradient>
-
-                {/* Secondary Softer Refraction Gradient */}
-                <linearGradient id="secondaryBeam" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0" />
-                  <stop offset="50%" stopColor="#FFFFFF" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
-                </linearGradient>
-
-                {/* Glass Curvature Highlights */}
-                <linearGradient id="glassEdgeFresnel" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.55" />
-                  <stop offset="5%" stopColor="#FFFFFF" stopOpacity="0.2" />
-                  <stop offset="15%" stopColor="#FFFFFF" stopOpacity="0.03" />
-                  <stop offset="85%" stopColor="#FDB716" stopOpacity="0.05" />
-                  <stop offset="96%" stopColor="#FDB716" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.5" />
-                </linearGradient>
-
-                {/* Glass Punt Base Thickness Gradient */}
-                <linearGradient id="puntBaseGrad" x1="0" y1="1" x2="0" y2="0">
-                  <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.45" />
-                  <stop offset="40%" stopColor="#A78040" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#161617" stopOpacity="0" />
-                </linearGradient>
-
-                {/* Exact Silhouette Clip for Glass Body & Neck */}
-                <clipPath id="heroBottleGlassClip">
-                  <path d="M 64 34 L 64 90 Q 64 125, 26 145 L 26 340 A 18 18 0 0 0 44 358 L 116 358 A 18 18 0 0 0 134 340 L 134 145 Q 96 125, 96 90 L 96 34 Z" />
-                </clipPath>
-              </defs>
-
-              {/* Bottle Cap (Golden brass ribbed cap with specular bevel) */}
-              <rect x="62" y="12" width="36" height="22" rx="4" fill="#A78040" />
-              <rect x="63" y="13" width="34" height="3" rx="1.5" fill="#FFFADE" opacity="0.4" />
-              <line x1="68" y1="16" x2="68" y2="34" stroke="#825F27" strokeWidth="1" />
-              <line x1="74" y1="16" x2="74" y2="34" stroke="#825F27" strokeWidth="1" />
-              <line x1="80" y1="16" x2="80" y2="34" stroke="#825F27" strokeWidth="1" />
-              <line x1="86" y1="16" x2="86" y2="34" stroke="#825F27" strokeWidth="1" />
-              <line x1="92" y1="16" x2="92" y2="34" stroke="#825F27" strokeWidth="1" />
-
-              {/* 1. Base Liquid Body with Outline */}
-              <path
-                d="M 64 34 L 64 90 Q 64 125, 26 145 L 26 340 A 18 18 0 0 0 44 358 L 116 358 A 18 18 0 0 0 134 340 L 134 145 Q 96 125, 96 90 L 96 34 Z"
-                fill="url(#coldBrewLiquid)"
-                stroke="#161617"
-                strokeWidth="2.5"
+              <img
+                src="/assets/images/hero-bottle.webp"
+                alt="بطری شیشه‌ای SEA BREW پر از نوشیدنی قهوه سرد، با برچسب رسمی برند"
+                width={494}
+                height={967}
+                decoding="async"
+                className="h-full w-full object-contain select-none"
               />
-
-              {/* 2. Glass Internal Layers & Animated Specular Reflections (Clipped to Bottle) */}
-              <g clipPath="url(#heroBottleGlassClip)">
-                {/* Cylindrical Edge Fresnel Layer */}
-                <rect x="24" y="34" width="112" height="326" fill="url(#glassEdgeFresnel)" />
-
-                {/* Cold brew liquid meniscus at neck base */}
-                <ellipse cx="80" cy="112" rx="16" ry="3" fill="#A78040" opacity="0.4" />
-
-                {/* Primary Diagonal Animated Specular Shine Beam */}
-                <g className="mix-blend-screen pointer-events-none">
-                  <polygon
-                    points="-80,-40 -20,-40 60,420 0,420"
-                    fill="url(#specularBeam)"
-                    opacity="0.85"
-                  >
-                    <animateTransform
-                      attributeName="transform"
-                      type="translate"
-                      values="-90,-60; 160,110; 260,190; 260,190"
-                      keyTimes="0; 0.55; 0.75; 1"
-                      dur="5.2s"
-                      repeatCount="indefinite"
-                    />
-                  </polygon>
-
-                  {/* Secondary Thin Trailing Optical Glint */}
-                  <polygon
-                    points="-110,-40 -85,-40 -5,420 -30,420"
-                    fill="url(#secondaryBeam)"
-                    opacity="0.6"
-                  >
-                    <animateTransform
-                      attributeName="transform"
-                      type="translate"
-                      values="-90,-60; 160,110; 260,190; 260,190"
-                      keyTimes="0; 0.55; 0.75; 1"
-                      dur="5.2s"
-                      repeatCount="indefinite"
-                    />
-                  </polygon>
-                </g>
-
-                {/* Heavy Glass Bottom Punt / Base Bevel Meniscus */}
-                <path
-                  d="M 30 344 Q 80 338, 130 344 L 132 356 Q 80 360, 28 356 Z"
-                  fill="url(#puntBaseGrad)"
-                />
-
-                {/* Refined Glass Edge Contour Highlighting (Left Rim Specular Line) */}
-                <path
-                  d="M 29 150 L 29 336"
-                  stroke="#FFFFFF"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  opacity="0.6"
-                />
-
-                {/* Right Edge Golden Rim Backlight */}
-                <path
-                  d="M 131 150 L 131 336"
-                  stroke="#FDB716"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  opacity="0.45"
-                />
-
-                {/* Shoulder Curved Reflection Crescent */}
-                <path
-                  d="M 32 144 Q 58 126, 63 92"
-                  stroke="#FFFFFF"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  opacity="0.55"
-                />
-                <path
-                  d="M 128 144 Q 102 126, 97 92"
-                  stroke="#FDB716"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  opacity="0.4"
-                />
-              </g>
-
-              {/* 3. Minimalist Label Band (Cream canvas, Ink typography, Gold borders with drop shadow) */}
-              <g transform="translate(30, 175)" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.25))">
-                <rect
-                  x="0"
-                  y="0"
-                  width="100"
-                  height="115"
-                  rx="6"
-                  fill="#FFFADE"
-                  stroke="#A78040"
-                  strokeWidth="1.2"
-                />
-                {/* Official SeaBrew Logo Mark on Bottle Label */}
-                <circle cx="68" cy="22" r="5" fill="#FDB716" />
-                <path
-                  d="M 36 28 C 42 21, 50 20, 56 25 C 60 29, 64 30, 72 29"
-                  stroke="#161617"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-                <path
-                  d="M 42 36 C 46 42, 53 43, 62 42"
-                  stroke="#825F27"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-
-                {/* Brand Wordmark & Subtitle */}
-                <text
-                  x="50"
-                  y="62"
-                  textAnchor="middle"
-                  fontFamily="'Estedad', sans-serif"
-                  fontWeight="900"
-                  fontSize="11.5"
-                  fill="#161617"
-                  letterSpacing="1"
-                >
-                  SEA BREW
-                </text>
-                <text
-                  x="50"
-                  y="74"
-                  textAnchor="middle"
-                  fontFamily="sans-serif"
-                  fontWeight="700"
-                  fontSize="4.8"
-                  fill="#825F27"
-                  letterSpacing="0.5"
-                >
-                  COFFEE & DRINKS
-                </text>
-
-                {/* Bushehr origin label */}
-                <text
-                  x="50"
-                  y="96"
-                  textAnchor="middle"
-                  fontFamily="'Estedad', sans-serif"
-                  fontWeight="600"
-                  fontSize="7"
-                  fill="#825F27"
-                >
-                  بوشهر • خلیج فارس
-                </text>
-              </g>
-
-              {/* 4. Twinkling Sun Glint Micro-Stars on Glass */}
-              {/* Shoulder sparkle */}
-              <g transform="translate(42, 134)" opacity="0.8">
-                <path
-                  d="M 0,-5 Q 0,0 5,0 Q 0,0 0,5 Q 0,0 -5,0 Q 0,0 0,-5 Z"
-                  fill="#FFFFFF"
-                >
-                  <animate
-                    attributeName="opacity"
-                    values="0.2; 1; 0.2"
-                    dur="3.8s"
-                    repeatCount="indefinite"
-                  />
-                  <animateTransform
-                    attributeName="transform"
-                    type="scale"
-                    values="0.7; 1.25; 0.7"
-                    dur="3.8s"
-                    repeatCount="indefinite"
-                  />
-                </path>
-              </g>
-
-              {/* Lower flank sparkle */}
-              <g transform="translate(126, 318)" opacity="0.75">
-                <path
-                  d="M 0,-4 Q 0,0 4,0 Q 0,0 0,4 Q 0,0 -4,0 Q 0,0 0,-4 Z"
-                  fill="#FDB716"
-                >
-                  <animate
-                    attributeName="opacity"
-                    values="0.1; 0.95; 0.1"
-                    dur="4.4s"
-                    repeatCount="indefinite"
-                  />
-                  <animateTransform
-                    attributeName="transform"
-                    type="scale"
-                    values="0.6; 1.3; 0.6"
-                    dur="4.4s"
-                    repeatCount="indefinite"
-                  />
-                </path>
-              </g>
-            </svg>
+              {/* Glass animation: subtle edge glow + diagonal light sweep,
+                  both masked to the bottle silhouette so light only shows
+                  on the glass, never on the dark area around it. */}
+              <div
+                className="absolute inset-0 pointer-events-none bottle-edge-glow"
+                aria-hidden="true"
+              />
+              <div
+                className="absolute inset-0 pointer-events-none bottle-shine"
+                aria-hidden="true"
+              />
           </div>
         </div>
       </div>
@@ -854,7 +581,7 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
 
       {/* Signature TideLine at the bottom of Hero */}
       <div className="w-full mt-8">
-        <TideLine sunPosition={35} color="#A78040" />
+        <TideLine sunPosition={50} color="var(--color-gold)" />
       </div>
     </section>
   );

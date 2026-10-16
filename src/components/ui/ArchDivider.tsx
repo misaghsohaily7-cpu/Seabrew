@@ -23,32 +23,33 @@ export const ArchDivider: React.FC<ArchDividerProps> = ({
     switch (variant) {
       case 'warm':
         return {
-          wrapperBg: 'bg-[#C9B8B6]',
-          lineGrad: 'from-transparent via-[#825F27]/30 to-[#825F27]/50',
-          archBg: 'bg-[#D4C7C5]/70 backdrop-blur-xs',
-          archBorder: 'border-[#825F27]/30',
-          textColor: 'text-[#825F27]',
-          dotColor: 'bg-[#FDB716]',
+          wrapperBg: 'bg-[var(--color-dust)]',
+          lineGrad: 'from-transparent via-[var(--color-maroon)]/30 to-[var(--color-maroon)]/50',
+          archBg: 'bg-[var(--color-dust-light)]/70 backdrop-blur-xs',
+          archBorder: 'border-[var(--color-maroon)]/30',
+          textColor: 'text-[var(--color-maroon)]',
+          dotColor: 'bg-[var(--color-sun)]',
         };
       case 'warm-to-gold':
         return {
-          wrapperBg: 'bg-gradient-to-b from-[#C9B8B6] to-[#FFFADE]',
-          lineGrad: 'from-transparent via-[#A78040]/30 to-[#A78040]/50',
-          archBg: 'bg-[#FFFADE]/80 backdrop-blur-xs',
-          archBorder: 'border-[#A78040]/40',
-          textColor: 'text-[#825F27]',
-          dotColor: 'bg-[#FDB716]',
+          wrapperBg: 'bg-gradient-to-b from-[var(--color-dust)] to-[var(--color-cream)]',
+          lineGrad: 'from-transparent via-[var(--color-gold)]/30 to-[var(--color-gold)]/50',
+          archBg: 'bg-[var(--color-cream)]/80 backdrop-blur-xs',
+          archBorder: 'border-[var(--color-gold)]/40',
+          textColor: 'text-[var(--color-maroon)]',
+          dotColor: 'bg-[var(--color-sun)]',
         };
       case 'gold-to-dark':
         return {
-          wrapperBg: 'bg-gradient-to-b from-[#ece1cc] to-[#FFFADE]',
-          lineGrad: 'from-transparent via-[#A78040]/40 to-[#A78040]/60',
-          archBg: 'bg-[#FFFADE]/90 backdrop-blur-xs',
-          archBorder: 'border-[#A78040]/50',
-          textColor: 'text-[#161617]',
-          dotColor: 'bg-[#FDB716]',
+          wrapperBg: 'bg-gradient-to-b from-[var(--color-parchment)] to-[var(--color-cream)]',
+          lineGrad: 'from-transparent via-[var(--color-gold)]/40 to-[var(--color-gold)]/60',
+          archBg: 'bg-[var(--color-cream)]/90 backdrop-blur-xs',
+          archBorder: 'border-[var(--color-gold)]/50',
+          textColor: 'text-[var(--color-ink)]',
+          dotColor: 'bg-[var(--color-sun)]',
         };
       case 'dark':
+        // Stays hardcoded — this divider belongs to the always-dark narrative sections
         return {
           wrapperBg: 'bg-[#161617]',
           lineGrad: 'from-transparent via-[#A78040]/30 to-[#A78040]/50',
@@ -60,12 +61,12 @@ export const ArchDivider: React.FC<ArchDividerProps> = ({
       case 'cream-to-warm':
       default:
         return {
-          wrapperBg: 'bg-gradient-to-b from-[#FFFADE] to-[#FFFADE]',
-          lineGrad: 'from-transparent via-[#A78040]/30 to-[#A78040]/50',
-          archBg: 'bg-[#FFFADE]/95 backdrop-blur-xs',
-          archBorder: 'border-[#A78040]/35',
-          textColor: 'text-[#825F27]',
-          dotColor: 'bg-[#FDB716]',
+          wrapperBg: 'bg-gradient-to-b from-[var(--color-cream)] to-[var(--color-cream)]',
+          lineGrad: 'from-transparent via-[var(--color-gold)]/30 to-[var(--color-gold)]/50',
+          archBg: 'bg-[var(--color-cream)]/95 backdrop-blur-xs',
+          archBorder: 'border-[var(--color-gold)]/35',
+          textColor: 'text-[var(--color-maroon)]',
+          dotColor: 'bg-[var(--color-sun)]',
         };
     }
   };

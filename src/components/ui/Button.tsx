@@ -65,8 +65,8 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
     ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
     ${
       isPrimary
-        ? 'bg-[#161617] text-[#FFFADE] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#161617]'
-        : 'bg-[#FFFADE] text-[#161617] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FFFADE]'
+        ? 'bg-[var(--color-ink)] text-[var(--color-cream)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-ink)]'
+        : 'bg-[var(--color-cream)] text-[var(--color-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-cream)]'
     }
     ${className}
   `;
@@ -96,8 +96,8 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
           }}
         >
           <InkCoffeeBranch
-            className="w-7 h-7 text-[#A78040] transform -translate-y-1"
-            color="#A78040"
+            className="w-7 h-7 text-[var(--color-gold)] transform -translate-y-1"
+            color="var(--color-gold)"
             strokeWidth={1.5}
           />
         </div>
@@ -115,8 +115,8 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
           }}
         >
           <InkLeaf
-            className="w-6 h-6 text-[#A78040] transform -translate-y-1"
-            color="#A78040"
+            className="w-6 h-6 text-[var(--color-gold)] transform -translate-y-1"
+            color="var(--color-gold)"
             strokeWidth={1.5}
           />
         </div>
@@ -134,8 +134,8 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
           }}
         >
           <InkBeanStem
-            className="w-6 h-6 text-[#A78040] transform -translate-y-1"
-            color="#A78040"
+            className="w-6 h-6 text-[var(--color-gold)] transform -translate-y-1"
+            color="var(--color-gold)"
             strokeWidth={1.5}
           />
         </div>
@@ -152,8 +152,8 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
           }`}
           style={{
             background: isPrimary
-              ? 'linear-gradient(90deg, #161617 0%, #825F27 50%, #161617 100%)'
-              : 'linear-gradient(90deg, #FFFADE 0%, #F5E9C0 50%, #FFFADE 100%)',
+              ? 'linear-gradient(90deg, var(--color-ink) 0%, var(--color-maroon) 50%, var(--color-ink) 100%)'
+              : 'linear-gradient(90deg, var(--color-cream) 0%, #F5E9C0 50%, var(--color-cream) 100%)',
             transform: isHovered && !disabled ? 'translateX(-50%)' : 'translateX(0%)',
             transitionProperty: 'transform, opacity',
             transitionDuration: isHovered ? '2.5s' : '0.5s',
@@ -167,7 +167,7 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
         <span>{children}</span>
         {isPrimary && (
           <span
-            className="w-2.5 h-2.5 rounded-full bg-[#FDB716] inline-block shadow-[0_0_8px_rgba(253,183,22,0.8)]"
+            className="w-2.5 h-2.5 rounded-full bg-[var(--color-sun)] inline-block shadow-[0_0_8px_rgba(253,183,22,0.8)]"
             aria-hidden="true"
           />
         )}

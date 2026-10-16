@@ -31,18 +31,43 @@
   --color-sun: #FDB716;
   --color-dust: #C9B8B6;
   --color-seaglass: #7FA096;
+  /* Mid-tone brand shades used by ArchDivider transitions */
+  --color-parchment: #ece1cc;
+  --color-dust-light: #D4C7C5;
+  /* Surface-fixed cream: never flips with theme (logos on dark sections) */
+  --color-cream-fixed: #FFFADE;
+  color-scheme: light;
 }
 
+/* Dark mode palette — applied via data-theme on <html>.
+   Light-phase surfaces flip to deep warm charcoal; dark-phase sections
+   (Story / Contact / Footer) stay hardcoded and remain legible. */
+html[data-theme="dark"] {
+  --color-cream: #131209;
+  --color-ink: #F2EDDC;
+  --color-gold: #C89B5A;
+  --color-maroon: #D8AE6E;
+  --color-sun: #FDB716;
+  --color-dust: #38302B;
+  --color-seaglass: #7A9A90;
+  --color-parchment: #2A251E;
+  --color-dust-light: #2E2828;
+  color-scheme: dark;
+}
+
+/* Smooth theme flip for page-level surfaces (element-level colors
+   switch instantly, which keeps GSAP/ScrollSmoother animations intact) */
 html {
   font-family: 'Estedad', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #FFFADE;
-  color: #161617;
+  background-color: var(--color-cream);
+  color: var(--color-ink);
   direction: rtl;
   scroll-behavior: smooth;
   scroll-snap-type: y proximity;
   letter-spacing: normal !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 /* Subtle magnetic snapping for narrative sections */
@@ -60,17 +85,18 @@ section[id] {
 body {
   margin: 0;
   padding: 0;
-  background-color: #FFFADE;
-  color: #161617;
+  background-color: var(--color-cream);
+  color: var(--color-ink);
   min-height: 100vh;
   overflow-x: hidden;
   font-feature-settings: "kern" 1, "liga" 1;
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 /* Selection */
 ::selection {
-  background-color: #A78040;
-  color: #FFFADE;
+  background-color: var(--color-gold);
+  color: var(--color-ink);
 }
 
 /* Arch mask and shapes */
@@ -84,12 +110,12 @@ body {
 
 /* Custom focus ring */
 :focus-visible {
-  outline: 2px solid #161617;
+  outline: 2px solid var(--color-ink);
   outline-offset: 2px;
 }
 
 .focus-ink:focus-visible {
-  outline: 2px solid #161617;
+  outline: 2px solid var(--color-ink);
   outline-offset: 2px;
 }
 
@@ -170,6 +196,74 @@ body {
 
 .sun-dot-pulse {
   animation: sun-pulse 4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* Product card hover: bubbles rising inside the drink */
+@keyframes bottle-bubble {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.55);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.9;
+  }
+  70% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate3d(0, -46px, 0) scale(1.05);
+    opacity: 0;
+  }
+}
+
+.bottle-bubble {
+  animation: bottle-bubble 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  will-change: transform, opacity;
+}
+
+/* Glass shine sweep across the hero bottle — masked to the bottle silhouette
+   so the light only shows on the glass, not on the dark area around it. */
+.bottle-shine {
+  -webkit-mask: url('/assets/images/hero-bottle.webp') no-repeat center / contain;
+  mask: url('/assets/images/hero-bottle.webp') no-repeat center / contain;
+  background: linear-gradient(
+    108deg,
+    transparent 40%,
+    rgba(255, 250, 222, 0.28) 45%,
+    rgba(255, 255, 255, 0.58) 50%,
+    rgba(255, 250, 222, 0.28) 55%,
+    transparent 60%
+  );
+  background-size: 260% 100%;
+  background-position: 160% 0;
+  mix-blend-mode: screen;
+  animation: glass-shine 6.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: background-position;
+}
+
+@keyframes glass-shine {
+  0%   { background-position: 160% 0; }
+  55%  { background-position: -60% 0; }
+  100% { background-position: -60% 0; }
+}
+
+/* A soft vertical highlight on the left edge of the glass, breathing */
+.bottle-edge-glow {
+  -webkit-mask: url('/assets/images/hero-bottle.webp') no-repeat center / contain;
+  mask: url('/assets/images/hero-bottle.webp') no-repeat center / contain;
+  background: radial-gradient(
+    ellipse 28% 60% at 22% 42%,
+    rgba(255, 245, 210, 0.35) 0%,
+    rgba(255, 245, 210, 0.0) 70%
+  );
+  mix-blend-mode: screen;
+  animation: glass-edge 6s ease-in-out infinite;
+  will-change: opacity;
+}
+
+@keyframes glass-edge {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
 }
 
 /* Marquee infinite ticker in RTL */

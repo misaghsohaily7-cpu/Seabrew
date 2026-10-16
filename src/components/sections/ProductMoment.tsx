@@ -5,64 +5,49 @@ import { registerMotionPlugins, prefersReducedMotion } from '../../lib/motion';
 import { siteContent } from '../../content';
 import { SunDot } from '../ui/SunDot';
 import { Glass2DCanvas } from '../ui/Glass2DCanvas';
-import { Play, Pause, Sparkles, Droplets, Check } from 'lucide-react';
+import { Sparkles, Check } from 'lucide-react';
 
 interface StageInfo {
   id: number;
   threshold: number;
   roman: string;
   badge: string;
-  title: string;
-  flavorProfile: string;
-  lead: string;
-  ingredients: string[];
+  label: string;
   color: string;
 }
 
 const STAGES: StageInfo[] = [
   {
     id: 0,
+    label: 'یخ',
     threshold: 0.15,
     roman: '۰۱',
-    badge: 'گام نخست • کالبد بلورین',
-    title: 'تراش بلورین و یخ کریستالی',
-    flavorProfile: 'بستر آماده‌سازی در دمای صفر درجه',
-    lead: 'پیاله شیشه‌ای دست‌ساز با خطوط ملهم از درگاه‌های چوبی بوشهر، همراه با قطعات یخ بلورین زاویه‌دار برای تثبیت سرمای ماندگار.',
-    ingredients: ['پیاله شیشه‌ای دست‌ساز', 'قطعات یخ بلورین', 'خنکای تثبیت‌شده'],
-    color: '#A78040',
+    badge: 'گام ۱ • سرمای ماندگار',
+    color: 'var(--color-gold)',
   },
   {
     id: 1,
+    label: 'قهوه',
     threshold: 0.45,
     roman: '۰۲',
-    badge: 'گام دوم • استخراج سرد',
-    title: 'عصاره دم‌آوری پور-اور (Pour-Over)',
-    flavorProfile: '۱۰۰٪ عربیکا تخصصی با غلظت ابریشمی',
-    lead: 'باریکه‌ای زلال و زرین از قهوه فرآوری سرد که به آرامی بر روی یخ‌های کریستالی می‌نشیند و عطر میوه‌ای و شکوفه‌ای دانه‌ها را رها می‌سازد.',
-    ingredients: ['قهوه تخصصی عربیکا', 'عصاره‌گیری سرد', 'کف مخملی کرما'],
-    color: '#825F27',
+    badge: 'گام ۲ • عصاره سرد',
+    color: 'var(--color-maroon)',
   },
   {
     id: 2,
+    label: 'ترکیب',
     threshold: 0.75,
     roman: '۰۳',
-    badge: 'گام سوم • غنای اقلیمی',
-    title: 'ریشه ماکا و جینسینگ قرمز',
-    flavorProfile: 'طراوت و انرژی پایدار ساحلی',
-    lead: 'ترکیب ریشه‌های طبیعی محرک با عصاره خالص میوه جمبولان جنوب و عسل طبیعی؛ لایه‌ای عمیق با رنگ کهربایی درخشان.',
-    ingredients: ['جینسینگ سرخ کوهی', 'ریشه تقویت‌کننده ماکا', 'میوه جمبولان جنوب'],
+    badge: 'گام ۳ • ریشه‌های نیروبخش',
     color: '#C95F24',
   },
   {
     id: 3,
+    label: 'سرو',
     threshold: 0.95,
     roman: '۰۴',
-    badge: 'گام چهارم • شاهکار نهایی',
-    title: 'خنکای میوه ساحلی و سرو نهایی',
-    flavorProfile: 'آماده نوشیدن • تعادل کامل طعم و انرژی',
-    lead: 'با افزودن برش توت‌فرنگی تازه و بازتاب طلایی خورشید بوشهر بر سطح پیاله، تجربه نوشیدنی SEA BREW کامل می‌شود.',
-    ingredients: ['برش توت‌فرنگی تازه', 'پودر ماچای تشریفاتی', 'عسل وحشی بوشهر'],
-    color: '#FDB716',
+    badge: 'گام ۴ • پایان ساحلی',
+    color: 'var(--color-sun)',
   },
 ];
 
@@ -70,8 +55,12 @@ export const ProductMoment: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const pinContainerRef = useRef<HTMLDivElement>(null);
   const scrollTriggerInstance = useRef<ScrollTrigger | null>(null);
-  const autoPlayTweenRef = useRef<gsap.core.Tween | null>(null);
-  const isPlayingRef = useRef<boolean>(false);
+  const jumpTweenRef = useRef<gsap.core.Tween | null>(null);
+  // 3D glass stage references
+  const stageRef = useRef<HTMLDivElement>(null);
+  const glassTiltRef = useRef<HTMLDivElement>(null);
+  const glassGlossRef = useRef<HTMLDivElement>(null);
+  const glassBackRef = useRef<SVGSVGElement>(null);
 
   // Progressive states
   const [scrollPercent, setScrollPercent] = useState<number>(() =>
@@ -81,7 +70,77 @@ export const ProductMoment: React.FC = () => {
     prefersReducedMotion() ? 3 : 0
   );
   const [isPouringStream, setIsPouringStream] = useState<boolean>(false);
-  const [isPlayingAuto, setIsPlayingAuto] = useState<boolean>(false);
+  // Which product's recipe the anatomy section follows (tab selection)
+  const [activeProduct, setActiveProduct] = useState<number>(0);
+  const activeProductData = siteContent.productList[activeProduct];
+  // The step narrative belongs to the selected product (ingredient-driven)
+  const activeStep = activeProductData.steps[activeStageIndex] ?? activeProductData.steps[0];
+
+  // 3D parallax tilt on the glass stage — tracks the cursor so the tumbler
+  // reads as a real object in space (depth layers shift at different rates).
+  // Desktop / fine-pointer only; disabled under prefers-reduced-motion.
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    if (prefersReducedMotion()) return;
+    if (!window.matchMedia('(pointer: fine)').matches) return;
+
+    const onMove = (e: MouseEvent) => {
+      const r = stage.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      if (glassTiltRef.current) {
+        gsap.to(glassTiltRef.current, {
+          rotateY: x * 16,
+          rotateX: -y * 16,
+          scale: 1.04,
+          duration: 0.6,
+          ease: 'power2.out',
+          overwrite: 'auto',
+        });
+      }
+      if (glassGlossRef.current) {
+        gsap.to(glassGlossRef.current, {
+          x: -x * 26,
+          y: -y * 26,
+          duration: 0.6,
+          ease: 'power2.out',
+          overwrite: 'auto',
+        });
+      }
+      if (glassBackRef.current) {
+        gsap.to(glassBackRef.current, {
+          rotateY: x * 7,
+          rotateX: -y * 7,
+          duration: 0.9,
+          ease: 'power2.out',
+          overwrite: 'auto',
+        });
+      }
+    };
+
+    const onLeave = () => {
+      if (glassTiltRef.current)
+        gsap.to(glassTiltRef.current, {
+          rotateY: 0,
+          rotateX: 0,
+          scale: 1,
+          duration: 0.9,
+          ease: 'power3.out',
+        });
+      if (glassGlossRef.current)
+        gsap.to(glassGlossRef.current, { x: 0, y: 0, duration: 0.9, ease: 'power3.out' });
+      if (glassBackRef.current)
+        gsap.to(glassBackRef.current, { rotateY: 0, rotateX: 0, duration: 1.1, ease: 'power3.out' });
+    };
+
+    stage.addEventListener('mousemove', onMove, { passive: true });
+    stage.addEventListener('mouseleave', onLeave);
+    return () => {
+      stage.removeEventListener('mousemove', onMove);
+      stage.removeEventListener('mouseleave', onLeave);
+    };
+  }, []);
 
   // Synchronized GSAP ScrollTrigger with long, deliberate scroll distance
   useEffect(() => {
@@ -101,16 +160,14 @@ export const ProductMoment: React.FC = () => {
         scrub: 1.2,
         invalidateOnRefresh: true,
         onUpdate: (self) => {
-          if (!isPlayingRef.current) {
-            const p = Math.max(0.08, Math.min(0.96, self.progress * 0.92 + 0.08));
-            setScrollPercent(p);
-            setIsPouringStream(self.direction > 0 && p > 0.18 && p < 0.94);
+          const p = Math.max(0.08, Math.min(0.98, self.progress * 0.9 + 0.08));
+          setScrollPercent(p);
+          setIsPouringStream(self.direction > 0 && p > 0.18 && p < 0.94);
 
-            if (p < 0.32) setActiveStageIndex(0);
-            else if (p < 0.62) setActiveStageIndex(1);
-            else if (p < 0.86) setActiveStageIndex(2);
-            else setActiveStageIndex(3);
-          }
+          if (p < 0.32) setActiveStageIndex(0);
+          else if (p < 0.62) setActiveStageIndex(1);
+          else if (p < 0.78) setActiveStageIndex(2);
+          else setActiveStageIndex(3);
         },
       });
 
@@ -127,16 +184,14 @@ export const ProductMoment: React.FC = () => {
         scrub: 1.0,
         invalidateOnRefresh: true,
         onUpdate: (self) => {
-          if (!isPlayingRef.current) {
-            const p = Math.max(0.08, Math.min(0.96, self.progress * 0.92 + 0.08));
-            setScrollPercent(p);
-            setIsPouringStream(self.direction > 0 && p > 0.18 && p < 0.94);
+          const p = Math.max(0.08, Math.min(0.98, self.progress * 0.9 + 0.08));
+          setScrollPercent(p);
+          setIsPouringStream(self.direction > 0 && p > 0.18 && p < 0.94);
 
-            if (p < 0.32) setActiveStageIndex(0);
-            else if (p < 0.62) setActiveStageIndex(1);
-            else if (p < 0.86) setActiveStageIndex(2);
-            else setActiveStageIndex(3);
-          }
+          if (p < 0.32) setActiveStageIndex(0);
+          else if (p < 0.62) setActiveStageIndex(1);
+          else if (p < 0.78) setActiveStageIndex(2);
+          else setActiveStageIndex(3);
         },
       });
 
@@ -144,8 +199,8 @@ export const ProductMoment: React.FC = () => {
     });
 
     return () => {
-      if (autoPlayTweenRef.current) {
-        autoPlayTweenRef.current.kill();
+      if (jumpTweenRef.current) {
+        jumpTweenRef.current.kill();
       }
       mm.revert();
       scrollTriggerInstance.current = null;
@@ -157,15 +212,15 @@ export const ProductMoment: React.FC = () => {
     const trigger = scrollTriggerInstance.current;
     if (!trigger) return;
 
-    const targetProgress = [0.08, 0.42, 0.72, 0.96][stageIndex];
+    const targetProgress = [0.08, 0.40, 0.68, 0.97][stageIndex];
     const targetScroll = trigger.start + targetProgress * (trigger.end - trigger.start);
 
     const scrollObj = { y: window.scrollY || window.pageYOffset || 0 };
-    if (autoPlayTweenRef.current) {
-      autoPlayTweenRef.current.kill();
+    if (jumpTweenRef.current) {
+      jumpTweenRef.current.kill();
     }
 
-    autoPlayTweenRef.current = gsap.to(scrollObj, {
+    jumpTweenRef.current = gsap.to(scrollObj, {
       y: targetScroll,
       duration: 1.2,
       ease: 'pour',
@@ -175,64 +230,15 @@ export const ProductMoment: React.FC = () => {
     });
   }, []);
 
-  // Cinematic Auto-Play presentation mode
-  const handleToggleAutoPlay = () => {
-    const trigger = scrollTriggerInstance.current;
-    if (!trigger) return;
-
-    if (isPlayingAuto) {
-      isPlayingRef.current = false;
-      setIsPlayingAuto(false);
-      if (autoPlayTweenRef.current) {
-        autoPlayTweenRef.current.kill();
-      }
-      setIsPouringStream(false);
-    } else {
-      isPlayingRef.current = true;
-      setIsPlayingAuto(true);
-      setIsPouringStream(true);
-
-      const scrollObj = { y: trigger.start };
-      window.scrollTo(0, trigger.start);
-
-      if (autoPlayTweenRef.current) {
-        autoPlayTweenRef.current.kill();
-      }
-
-      // Smoothly scroll window from start to end of the pinned section
-      autoPlayTweenRef.current = gsap.to(scrollObj, {
-        y: trigger.end - 50,
-        duration: 7.5,
-        ease: 'tide',
-        onUpdate: () => {
-          window.scrollTo(0, scrollObj.y);
-          if (trigger) {
-            const p = Math.max(0.08, Math.min(0.96, trigger.progress * 0.92 + 0.08));
-            setScrollPercent(p);
-            if (p < 0.32) setActiveStageIndex(0);
-            else if (p < 0.62) setActiveStageIndex(1);
-            else if (p < 0.86) setActiveStageIndex(2);
-            else setActiveStageIndex(3);
-          }
-        },
-        onComplete: () => {
-          isPlayingRef.current = false;
-          setIsPlayingAuto(false);
-          setIsPouringStream(false);
-        },
-      });
-    }
-  };
-
   const currentStage = STAGES[activeStageIndex];
 
   return (
     <section
       id="product"
       ref={sectionRef}
-      className="relative w-full bg-[#FFFADE] select-none"
+      className="relative w-full bg-[var(--color-cream)] select-none"
       style={{
-        background: 'linear-gradient(180deg, #FFFADE 0%, #F5ECC9 50%, #FFFADE 100%)',
+        background: 'linear-gradient(180deg, var(--color-cream) 0%, #F5ECC9 50%, var(--color-cream) 100%)',
       }}
       aria-label="بخش آناتومی طعم و شبیه‌سازی سه‌بعدی پیاله SEA BREW"
     >
@@ -242,18 +248,19 @@ export const ProductMoment: React.FC = () => {
         className="w-full h-screen min-h-[640px] flex flex-col justify-between py-6 sm:py-8 px-[6vw] overflow-hidden"
       >
         <div className="max-w-[1400px] w-full mx-auto flex-1 flex flex-col justify-between">
-          {/* Top Bar: Section Badge, Progress Tracker & Play Controls */}
-          <header className="flex items-center justify-between gap-4 border-b border-[#A78040]/25 pb-4">
+          {/* Top Bar: Section Badge & Stage Progress Tracker */}
+          <header className="flex flex-col gap-2.5 border-b border-[var(--color-gold)]/25 pb-2.5">
+            <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#161617] text-[#FDB716] flex items-center justify-center font-mono text-xs font-bold shadow-xs">
+              <div className="w-8 h-8 rounded-full bg-[var(--color-ink)] text-[var(--color-sun)] flex items-center justify-center font-mono text-xs font-bold shadow-xs">
                 {currentStage.roman}
               </div>
               <div className="flex flex-col">
-                <span className="text-[11px] font-bold text-[#825F27] uppercase tracking-widest flex items-center gap-1.5">
-                  <Sparkles className="w-3 h-3 text-[#A78040]" />
+                <span className="text-[11px] font-bold text-[var(--color-maroon)] uppercase tracking-widest flex items-center gap-1.5">
+                  <Sparkles className="w-3 h-3 text-[var(--color-gold)]" />
                   <span>{siteContent.productMoment.tag}</span>
                 </span>
-                <span className="text-xs sm:text-sm font-black text-[#161617]">
+                <span className="text-xs sm:text-sm font-black text-[var(--color-ink)]">
                   {currentStage.badge}
                 </span>
               </div>
@@ -262,7 +269,7 @@ export const ProductMoment: React.FC = () => {
             {/* Middle: 4 Stage Progress Dots */}
             <nav
               aria-label="مراحل آماده‌سازی پیاله"
-              className="hidden md:flex items-center gap-2 bg-[#FFFADE]/80 backdrop-blur-xs px-3 py-1.5 rounded-full border border-[#A78040]/30 shadow-xs"
+              className="hidden md:flex items-center gap-2 bg-[var(--color-cream)]/80 backdrop-blur-xs px-3 py-1.5 rounded-full border border-[var(--color-gold)]/30 shadow-xs"
             >
               {STAGES.map((s, idx) => {
                 const isActive = activeStageIndex === idx;
@@ -274,57 +281,65 @@ export const ProductMoment: React.FC = () => {
                     onClick={() => jumpToStage(idx)}
                     className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition-all duration-300 ${
                       isActive
-                        ? 'bg-[#161617] text-[#FFFADE] shadow-xs'
+                        ? 'bg-[var(--color-ink)] text-[var(--color-cream)] shadow-xs'
                         : isPassed
-                        ? 'bg-[#825F27]/15 text-[#825F27] hover:bg-[#825F27]/25'
-                        : 'text-[#161617]/50 hover:text-[#161617]'
+                        ? 'bg-[var(--color-maroon)]/15 text-[var(--color-maroon)] hover:bg-[var(--color-maroon)]/25'
+                        : 'text-[var(--color-ink)]/50 hover:text-[var(--color-ink)]'
                     }`}
                   >
                     <span>{s.roman}</span>
-                    <span className="hidden lg:inline">{s.title.split(' ')[0]}</span>
-                    {isPassed && <Check className="w-3 h-3 text-[#825F27]" />}
+                    <span className="hidden lg:inline">{s.label}</span>
+                    {isPassed && <Check className="w-3 h-3 text-[var(--color-maroon)]" />}
                   </button>
                 );
               })}
             </nav>
-
-            {/* Auto Play / Showcase Button */}
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={handleToggleAutoPlay}
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-[#161617] text-[#FFFADE] text-xs font-bold hover:bg-[#825F27] transition-all duration-300 shadow-sm"
-                aria-label={isPlayingAuto ? 'توقف شوکیس' : 'پخش خودکار شوکیس'}
-              >
-                {isPlayingAuto ? (
-                  <>
-                    <Pause className="w-3.5 h-3.5 fill-current" />
-                    <span className="hidden sm:inline">توقف شوکیس</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-3.5 h-3.5 fill-current" />
-                    <span className="hidden sm:inline">اجرای شوکیس</span>
-                  </>
-                )}
-              </button>
             </div>
+
+            {/* Product tabs — each product drives its own recipe & tint */}
+            <nav
+              aria-label="انتخاب محصول"
+              className="flex items-center gap-2 overflow-x-auto no-scrollbar"
+            >
+              {siteContent.productList.map((product, idx) => {
+                const isActive = activeProduct === idx;
+                return (
+                  <button
+                    key={product.id}
+                    type="button"
+                    onClick={() => setActiveProduct(idx)}
+                    aria-pressed={isActive}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide whitespace-nowrap cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                      isActive
+                        ? 'text-[var(--color-cream)] shadow-md scale-[1.03]'
+                        : 'text-[var(--color-ink)]/55 border border-[var(--color-gold)]/30 hover:text-[var(--color-ink)] hover:border-[var(--color-gold)]/60'
+                    }`}
+                    style={isActive ? { backgroundColor: product.accent } : undefined}
+                  >
+                    {product.name}
+                  </button>
+                );
+              })}
+            </nav>
           </header>
 
           {/* Main Interactive Stage: 3D WebGL Tumbler (Center) + Rich Stage Card (Side) */}
-          <div className="flex-1 my-4 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-12 min-h-0">
+          <div className="flex-1 my-2 lg:my-4 flex flex-col lg:flex-row items-center justify-between gap-2 lg:gap-12 min-h-0">
             {/* Center-Left: Real 3D Tumbler Glass (Three.js WebGL with Buoyancy & Physics) */}
-            <div className="relative w-full lg:w-1/2 h-[340px] sm:h-[420px] lg:h-[480px] flex items-center justify-center">
-              {/* Background Architectural Halo & Palm Silhouettes */}
-              <div className="absolute w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-[#FDB716]/10 blur-3xl pointer-events-none" />
-
-              {/* Decorative Authentic Motif from Bushehr Windows */}
+            <div
+              ref={stageRef}
+              className="relative w-full lg:w-1/2 flex-1 min-h-[240px] sm:flex-none sm:h-[340px] lg:h-[480px] flex items-center justify-center [perspective:1200px]"
+              style={{ transformStyle: 'preserve-3d' }}
+            >
+              {/* Decorative Authentic Motif from Bushehr Windows (depth layer, behind) */}
               <svg
+                ref={glassBackRef}
                 viewBox="0 0 400 480"
                 className="absolute inset-0 w-full h-full pointer-events-none opacity-30 overflow-visible"
                 fill="none"
+                style={{ transform: 'translateZ(-60px)', willChange: 'transform' }}
               >
-                <g stroke="#825F27" strokeWidth="1.6" strokeLinecap="round">
+                <g stroke="var(--color-maroon)" strokeWidth="1.6" strokeLinecap="round">
                   {/* Outer arch window frame */}
                   <path d="M 60 440 L 60 200 A 140 140 0 0 1 340 200 L 340 440" />
                   <path d="M 75 440 L 75 210 A 125 125 0 0 1 325 210 L 325 440" strokeOpacity="0.5" />
@@ -334,68 +349,93 @@ export const ProductMoment: React.FC = () => {
                 </g>
               </svg>
 
-              {/* Elegant 2D Glass Tumbler Illustration */}
-              <div className="relative w-full h-full max-w-[420px] max-h-[480px] z-10 flex items-center justify-center">
+              {/* Elegant Glass Tumbler Illustration — tilts in 3D space on hover */}
+              <div
+                ref={glassTiltRef}
+                className="relative w-full h-full max-w-[420px] max-h-[480px] z-10 flex items-center justify-center"
+                style={{ transformStyle: 'preserve-3d', willChange: 'transform' }}
+              >
                 <Glass2DCanvas
                   progress={scrollPercent}
                   isPouring={isPouringStream}
+                  tint={activeProductData.accent}
+                  recipe={activeProductData.id}
                   className="w-full h-full"
                 />
-
-                {/* Craftsmanship Hint Badge */}
-                <div className="absolute bottom-2 inset-x-0 flex items-center justify-center pointer-events-none">
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#161617]/80 text-[#FFFADE] text-[11px] font-semibold tracking-wide backdrop-blur-xs opacity-80 border border-[#A78040]/30 shadow-sm">
-                    <Sparkles className="w-3.5 h-3.5 text-[#FDB716]" />
-                    <span>پیاله بلورین دست‌ساز • فرآوری دم‌آوری سرد</span>
-                  </span>
+                {/* Specular highlight that catches the light as the glass tilts */}
+                <div
+                  ref={glassGlossRef}
+                  className="pointer-events-none absolute inset-0 overflow-hidden rounded-[2rem]"
+                  aria-hidden="true"
+                  style={{ transform: 'translateZ(45px)', willChange: 'transform' }}
+                >
+                  <div
+                    className="absolute inset-0 mix-blend-screen"
+                    style={{
+                      background:
+                        'radial-gradient(120% 90% at 30% 22%, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.0) 42%), linear-gradient(125deg, transparent 32%, rgba(255,255,255,0.14) 46%, rgba(255,255,255,0.34) 50%, rgba(255,255,255,0.14) 54%, transparent 68%)',
+                    }}
+                  />
                 </div>
               </div>
             </div>
 
             {/* Right: Rich Sensory Editorial Narrative Card */}
             <div className="w-full lg:w-1/2 flex flex-col justify-center max-w-xl z-20">
-              <div className="relative p-6 sm:p-8 rounded-3xl bg-[#FFFADE]/85 border border-[#A78040]/35 backdrop-blur-md shadow-lg">
-                {/* Stage Header & Tasting Level */}
-                <div className="flex items-center justify-between mb-3">
+              <div className="relative p-4 sm:p-8 rounded-3xl bg-[var(--color-cream)]/85 border border-[var(--color-gold)]/35 backdrop-blur-md shadow-lg">
+                {/* Step badge — follows the pour animation */}
+                <div className="flex items-center justify-between gap-3 mb-3">
                   <span
-                    className="text-xs font-mono font-black tracking-widest uppercase px-3 py-1 rounded-full text-[#FFFADE]"
-                    style={{ backgroundColor: currentStage.color === '#FDB716' ? '#161617' : currentStage.color }}
+                    className="text-xs font-mono font-black tracking-widest uppercase px-3 py-1 rounded-full text-[var(--color-cream)]"
+                    style={{ backgroundColor: currentStage.color === 'var(--color-sun)' ? 'var(--color-ink)' : currentStage.color }}
                   >
                     گام {currentStage.roman}
                   </span>
-
-                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#825F27]">
-                    <Droplets className="w-3.5 h-3.5 text-[#A78040]" />
-                    <span>تراز پیاله: {Math.round(scrollPercent * 100)}٪</span>
-                  </div>
+                  <span className="text-[11px] font-bold text-[var(--color-maroon)]">
+                    {currentStage.badge}
+                  </span>
                 </div>
 
-                {/* Title and Profile */}
-                <h3 className="text-2xl sm:text-3xl font-black text-[#161617] mb-2 leading-tight">
-                  {currentStage.title}
+                {/* Product identity — follows the selected tab */}
+                <h3
+                  key={activeProductData.id}
+                  className="text-2xl sm:text-3xl font-black leading-none mb-1.5 transition-colors duration-500"
+                  style={{ color: activeProductData.accent }}
+                >
+                  {activeProductData.name}
                 </h3>
-
-                <p className="text-xs sm:text-sm font-bold text-[#825F27] mb-4">
-                  {currentStage.flavorProfile}
+                <p className="text-xs sm:text-sm font-bold text-[var(--color-ink)]/75 mb-4">
+                  {activeProductData.tagline}
                 </p>
 
-                {/* Editorial Body */}
-                <p className="text-xs sm:text-sm leading-relaxed font-medium text-[#161617]/80 mb-6">
-                  {currentStage.lead}
+                {/* Current step narrative — follows the pour animation */}
+                <p className="text-[11px] font-bold text-[var(--color-maroon)] mb-1.5 flex items-center gap-1.5">
+                  <SunDot size="sm" animate={false} />
+                  <span>{activeStep.title}</span>
+                </p>
+                <p className="text-xs sm:text-sm leading-relaxed font-medium text-[var(--color-ink)]/80 mb-5 min-h-[3.5rem]">
+                  {activeStep.lead}
                 </p>
 
-                {/* Active Key Ingredients Chips */}
-                <div className="border-t border-[#A78040]/25 pt-4">
-                  <div className="text-[11px] font-bold text-[#825F27] mb-2 uppercase tracking-wider">
-                    عناصر فعال این لایه:
+                {/* Selected product's ingredient list */}
+                <div className="border-t border-[var(--color-gold)]/25 pt-4">
+                  <div className="text-[11px] font-bold text-[var(--color-maroon)] mb-2 uppercase tracking-wider flex items-center gap-2">
+                    <span
+                      className="w-2 h-2 rounded-full transition-colors duration-500"
+                      style={{ backgroundColor: activeProductData.accent }}
+                    />
+                    <span>ترکیبات {activeProductData.name}</span>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {currentStage.ingredients.map((ing, i) => (
+                  <div key={activeProductData.id} className="flex flex-wrap gap-2 min-h-[3.5rem]">
+                    {activeProductData.ingredients.map((ing, i) => (
                       <span
                         key={i}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#161617] text-[#FFFADE] border border-[#A78040]/40 shadow-xs"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-ink)] text-[var(--color-cream)] border border-[var(--color-gold)]/40 shadow-xs"
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#FDB716]" />
+                        <span
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ backgroundColor: activeProductData.accent }}
+                        />
                         <span>{ing}</span>
                       </span>
                     ))}
@@ -404,19 +444,19 @@ export const ProductMoment: React.FC = () => {
               </div>
 
               {/* Bottom Scroll Cue Helper */}
-              <div className="mt-4 flex items-center justify-between text-xs font-medium text-[#825F27]">
+              <div className="mt-4 flex items-center justify-between text-xs font-medium text-[var(--color-maroon)]">
                 <div className="flex items-center gap-2">
                   <SunDot size="sm" animate={scrollPercent >= 0.88} />
                   <span>
                     {scrollPercent >= 0.88
-                      ? 'پیاله آماده سرو نهایی است'
-                      : 'برای تداوم دم‌آوری به پایین اسکرول کنید'}
+                      ? 'نوشیدنی آماده است'
+                      : 'برای دیدن مرحلهٔ بعد اسکرول کنید'}
                   </span>
                 </div>
 
-                <div className="w-32 h-1.5 bg-[#C9B8B6]/40 rounded-full overflow-hidden">
+                <div className="w-32 h-1.5 bg-[var(--color-dust)]/40 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#825F27] transition-all duration-100 ease-out"
+                    className="h-full bg-[var(--color-maroon)] transition-all duration-100 ease-out"
                     style={{ width: `${Math.round(scrollPercent * 100)}%` }}
                   />
                 </div>
@@ -425,9 +465,8 @@ export const ProductMoment: React.FC = () => {
           </div>
 
           {/* Footer Bar: Authentic Attribution */}
-          <footer className="flex items-center justify-between border-t border-[#A78040]/20 pt-3 text-[11px] font-semibold text-[#825F27]/80">
-            <span>فرمولاسیون اختصاصی دم‌آوری سرد • SEA BREW</span>
-            <span className="font-mono">BUSHEHR • COFFEE & DRINKS</span>
+          <footer className="flex items-center justify-center border-t border-[var(--color-gold)]/20 pt-3 text-[11px] font-semibold text-[var(--color-maroon)]/80">
+            <span>فرمول اختصاصی دم‌آوری سرد • SEA BREW</span>
           </footer>
         </div>
       </div>

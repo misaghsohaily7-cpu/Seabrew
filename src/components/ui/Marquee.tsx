@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { siteContent } from '../../content';
 
 interface MarqueeProps {
@@ -7,37 +7,17 @@ interface MarqueeProps {
   textColor?: string;
 }
 
+/**
+ * Brand signature ticker — runs at a constant, calm speed.
+ * (No scroll-velocity coupling: the strip simply keeps rotating on its own.)
+ */
 export const Marquee: React.FC<MarqueeProps> = ({
   className = '',
   bg = 'bg-transparent',
-  textColor = 'text-[#A78040]',
+  textColor = 'text-[var(--color-gold)]',
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const text = `${siteContent.marquee} `;
   const repeated = Array(8).fill(text);
-
-  useEffect(() => {
-    // Check reduced motion
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    let scrollSpeed = 1;
-    let lastScrollY = window.scrollY;
-
-    const handleScroll = () => {
-      const deltaY = Math.abs(window.scrollY - lastScrollY);
-      scrollSpeed = Math.min(3.5, 1 + deltaY * 0.02);
-      lastScrollY = window.scrollY;
-
-      if (containerRef.current) {
-        containerRef.current.style.animationDuration = `${30 / scrollSpeed}s`;
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
     <div
@@ -46,11 +26,10 @@ export const Marquee: React.FC<MarqueeProps> = ({
       aria-label="پیام امضای برند"
     >
       <div
-        ref={containerRef}
-        className="flex whitespace-nowrap animate-marquee hover:[animation-play-state:paused] focus-within:[animation-play-state:paused]"
+        className="flex whitespace-nowrap hover:[animation-play-state:paused] focus-within:[animation-play-state:paused]"
         aria-hidden="true"
         style={{
-          animation: 'marquee-rtl 32s linear infinite',
+          animation: 'marquee-rtl 36s linear infinite',
         }}
       >
         {repeated.map((item, idx) => (

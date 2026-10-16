@@ -1,36 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import {
-  registerMotionPlugins,
-  prefersReducedMotion,
-  getReducedMotionPreference,
-  setReducedMotionPreference,
-} from '../../lib/motion';
+import { ArrowUp } from 'lucide-react';
+import { registerMotionPlugins, prefersReducedMotion } from '../../lib/motion';
 import { siteContent } from '../../content';
 import { TideLine } from './TideLine';
 import { SeaBrewLogo } from './SeaBrewLogo';
-import { ZapOff, Sparkles } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   const footerRef = useRef<HTMLElement>(null);
   const lettersRef = useRef<(HTMLSpanElement | null)[]>([]);
-  const [reducedMotion, setReducedMotion] = useState<boolean>(() => getReducedMotionPreference());
 
-  const letters = ['S', 'E', 'A', ' ', 'B', 'R', 'E', 'W'];
+  // One-word brand mark, matching the bottle labels (SEABREW) — forced LTR
+  // so the letter-by-letter reveal never renders reversed under RTL page flow.
+  const letters = ['S', 'E', 'A', 'B', 'R', 'E', 'W'];
 
   useEffect(() => {
     registerMotionPlugins();
-
-    const handleMotionChange = (e: Event) => {
-      const customEvent = e as CustomEvent<{ reduced: boolean }>;
-      if (customEvent.detail) {
-        setReducedMotion(customEvent.detail.reduced);
-      } else {
-        setReducedMotion(getReducedMotionPreference());
-      }
-    };
-
-    window.addEventListener('sea_brew_motion_toggle', handleMotionChange);
 
     if (prefersReducedMotion()) return;
 
@@ -43,29 +28,19 @@ export const Footer: React.FC = () => {
         {
           yPercent: 0,
           opacity: 1,
-          duration: 0.9,
-          stagger: 0.08,
+          duration: 0.4,
+          stagger: 0.06,
           ease: 'tide',
           scrollTrigger: {
             trigger: footerRef.current,
-            start: 'top 85%',
+            start: 'top 95%',
           },
         }
       );
     }, footerRef);
 
-    return () => {
-      window.removeEventListener('sea_brew_motion_toggle', handleMotionChange);
-      ctx.revert();
-    };
+    return () => ctx.revert();
   }, []);
-
-  const handleToggleReducedMotion = () => {
-    const next = !reducedMotion;
-    setReducedMotion(next);
-    setReducedMotionPreference(next);
-  };
-
 
   return (
     <footer
@@ -76,7 +51,7 @@ export const Footer: React.FC = () => {
       <div className="max-w-[1440px] mx-auto px-[6vw] flex flex-col items-center">
         {/* Scroll Progress TideLine completing at Footer */}
         <div className="w-full mb-12">
-          <TideLine trackScrollProgress={true} color="#A78040" sunColor="#FDB716" />
+          <TideLine trackScrollProgress={false} sunPosition={50} color="#A78040" sunColor="#FDB716" />
         </div>
 
         {/* Large Wordmark Rising Letter-by-Letter with Logo Mark */}
@@ -85,7 +60,7 @@ export const Footer: React.FC = () => {
           aria-label="SEA BREW"
         >
           <SeaBrewLogo variant="mark-only" theme="light" size="lg" className="mb-4 opacity-90 hover:scale-105 transition-transform duration-300" />
-          <div className="font-black text-[clamp(3.5rem,14vw,11rem)] tracking-wider text-[#FFFADE] leading-none flex">
+          <div dir="ltr" className="font-black text-[clamp(3.5rem,14vw,11rem)] tracking-wider text-[#FFFADE] leading-none flex">
             {letters.map((char, idx) => (
               <span key={idx} className="inline-block overflow-hidden">
                 <span
@@ -94,65 +69,55 @@ export const Footer: React.FC = () => {
                   }}
                   className="inline-block will-change-transform"
                 >
-                  {char === ' ' ? '\u00A0' : char}
+                  {char}
                 </span>
               </span>
             ))}
           </div>
         </div>
 
-        {/* Accessibility & Reduce Motion Control Bar */}
-        <div className="w-full flex flex-col sm:flex-row items-center justify-center gap-3 my-6 pb-2">
-          <div className="inline-flex items-center gap-4 px-5 py-2.5 rounded-full border border-[#A78040]/30 bg-[#1e1e20]/90 shadow-inner transition-all hover:border-[#A78040]/60">
-            <span className="flex items-center gap-2 text-xs text-[#FFFADE]/90 font-medium select-none">
-              {reducedMotion ? (
-                <ZapOff className="w-4 h-4 text-[#FDB716]" aria-hidden="true" />
-              ) : (
-                <Sparkles className="w-4 h-4 text-[#A78040]" aria-hidden="true" />
-              )}
-              <span>کاهش انیمیشن‌ها (Reduce Motion)</span>
-            </span>
+        {/* Direct channels — centered */}
+        <div className="w-full mb-6 flex flex-wrap items-center justify-center gap-3">
+          <a
+            href={`https://wa.me/${siteContent.contact.direct.whatsapp.replace(/[^0-9]/g, '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            dir="ltr"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#A78040]/40 text-xs font-bold text-[#FFFADE] hover:text-[#161617] hover:bg-[#FDB716] hover:border-[#FDB716] transition-colors duration-300"
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
+              <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.42-1.5-.9-.8-1.5-1.79-1.68-2.09-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.65-1.57-.9-2.14-.23-.56-.47-.49-.65-.5h-.55c-.2 0-.5.07-.77.37-.27.3-1.02.99-1.02 2.42 0 1.42 1.04 2.8 1.19 2.99.15.2 2.05 3.13 4.96 4.28 2.42.95 2.91.76 3.44.71.52-.05 1.68-.69 1.92-1.35.24-.67.24-1.24.17-1.36-.07-.12-.27-.2-.57-.35zM12 2a10 10 0 0 0-8.6 15.1L2 22l5.05-1.32A10 10 0 1 0 12 2zm0 18.2c-1.5 0-2.96-.4-4.24-1.16l-.3-.18-3 .78.8-2.92-.2-.31A8.2 8.2 0 1 1 12 20.2z" />
+            </svg>
+            <span>{siteContent.contact.direct.whatsapp}</span>
+          </a>
 
-            <button
-              id="footer-reduce-motion-toggle"
-              type="button"
-              role="switch"
-              aria-checked={reducedMotion}
-              aria-label="تغییر وضعیت کاهش انیمیشن‌ها برای آسودگی و دسترس‌پذیری"
-              onClick={handleToggleReducedMotion}
-              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FDB716] ${
-                reducedMotion ? 'bg-[#FDB716]' : 'bg-[#333230]'
-              }`}
-            >
-              <span className="sr-only">تغییر وضعیت کاهش انیمیشن‌ها</span>
-              <span
-                aria-hidden="true"
-                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[#161617] shadow-sm transition-transform duration-300 ease-in-out ${
-                  reducedMotion ? 'translate-x-5' : 'translate-x-0'
-                }`}
-              />
-            </button>
-
-            <span className="text-[11px] font-mono tracking-wider text-[#A78040]">
-              {reducedMotion ? 'آرام (حداقل حرکت)' : 'پویا (سینمایی)'}
-            </span>
-          </div>
+          <a
+            href={`https://instagram.com/${siteContent.contact.direct.instagram}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            dir="ltr"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#A78040]/40 text-xs font-bold text-[#FFFADE] hover:text-[#161617] hover:bg-[#FDB716] hover:border-[#FDB716] transition-colors duration-300"
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
+              <path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.2.06 1.8.25 2.2.42.56.22.96.48 1.38.9.42.42.68.82.9 1.38.17.4.36 1 .42 2.2.06 1.3.07 1.7.07 4.9s0 3.6-.07 4.9c-.06 1.2-.25 1.8-.42 2.2-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.4.17-1 .36-2.2.42-1.3.06-1.7.07-4.9.07s-3.6 0-4.9-.07c-1.2-.06-1.8-.25-2.2-.42-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.17-.4-.36-1-.42-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.9c.06-1.2.25-1.8.42-2.2.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.4-.17 1-.36 2.2-.42C8.4 2.2 8.8 2.2 12 2.2zm0 1.8c-3.14 0-3.5 0-4.74.07-1.14.05-1.76.24-2.17.4-.55.21-.94.47-1.35.88-.41.41-.67.8-.88 1.35-.16.41-.35 1.03-.4 2.17C2.4 8.5 2.4 8.86 2.4 12s0 3.5.07 4.74c.05 1.14.24 1.76.4 2.17.21.55.47.94.88 1.35.41.41.8.67 1.35.88.41.16 1.03.35 2.17.4 1.24.07 1.6.07 4.74.07s3.5 0 4.74-.07c1.14-.05 1.76-.24 2.17-.4.55-.21.94-.47 1.35-.88.41-.41.67-.8.88-1.35.16-.41.35-1.03.4-2.17.07-1.24.07-1.6.07-4.74s0-3.5-.07-4.74c-.05-1.14-.24-1.76-.4-2.17a3.6 3.6 0 0 0-.88-1.35 3.6 3.6 0 0 0-1.35-.88c-.41-.16-1.03-.35-2.17-.4C15.5 4 15.14 4 12 4zm0 3.1a4.9 4.9 0 1 1 0 9.8 4.9 4.9 0 0 1 0-9.8zm0 1.8a3.1 3.1 0 1 0 0 6.2 3.1 3.1 0 0 0 0-6.2zm5.1-.7a1.15 1.15 0 1 1-2.3 0 1.15 1.15 0 0 1 2.3 0z" />
+            </svg>
+            <span>{siteContent.contact.direct.instagram}</span>
+          </a>
         </div>
 
-        {/* Legal & Origin Notice */}
-        <div className="w-full pt-8 border-t border-[#A78040]/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-bold tracking-widest uppercase text-[#C9B8B6] opacity-60">
-          <p>{siteContent.footer.legalNotice}</p>
-          <div className="flex flex-wrap items-center gap-6">
-            <span dir="ltr" className="font-mono text-[11px]">۲۸.۹۲۳۴° N, ۵۰.۸۲۶۴° E</span>
-            <span>{siteContent.brand.origin}</span>
-            <button
-              type="button"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="text-[#A78040] hover:text-[#FFFADE] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FFFADE] rounded-full px-2 py-1"
-            >
-              بازگشت به بالا ↑
-            </button>
-          </div>
+        {/* Origin & back-to-top */}
+        <div className="w-full pt-8 border-t border-[#A78040]/20 flex flex-wrap items-center justify-center gap-6 text-xs font-bold tracking-widest uppercase text-[#C9B8B6] opacity-60">
+          <span dir="ltr" className="font-mono text-[11px]">۲۸.۹۲۳۴° N, ۵۰.۸۲۶۴° E</span>
+          <span>{siteContent.brand.origin}</span>
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            aria-label="بازگشت به بالا"
+            title="بازگشت به بالا"
+            className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-[#A78040]/40 text-[#A78040] hover:text-[#FFFADE] hover:border-[#FFFADE]/60 transition-colors duration-300 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FFFADE]"
+          >
+            <ArrowUp className="w-4 h-4" aria-hidden="true" />
+          </button>
         </div>
       </div>
     </footer>

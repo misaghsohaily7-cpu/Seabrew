@@ -7,7 +7,7 @@ interface BotanicalBorderProps {
 
 export const BotanicalBorder: React.FC<BotanicalBorderProps> = ({
   className = '',
-  color = '#A78040',
+  color = 'var(--color-gold)',
 }) => {
   return (
     <svg

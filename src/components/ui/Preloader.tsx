@@ -73,7 +73,7 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
       role="dialog"
       aria-label="بارگذاری و طلوع خورشید برند SEA BREW"
       aria-live="polite"
-      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#FFFADE] select-none cursor-pointer transition-all duration-700 ${
+      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[var(--color-cream)] select-none cursor-pointer transition-all duration-700 ${
         isDismissed ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
       style={{
@@ -88,7 +88,7 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
         <div className="relative w-48 h-36 flex items-end justify-center overflow-hidden mb-6">
           {/* Sun Dot rising */}
           <div
-            className="absolute w-11 h-11 rounded-full bg-[#FDB716] transition-transform duration-100 ease-out"
+            className="absolute w-11 h-11 rounded-full bg-[var(--color-sun)] transition-transform duration-100 ease-out"
             style={{
               boxShadow: '0 0 24px rgba(253, 183, 22, 0.75)',
               transform: `translateY(${sunTranslateY}px)`,
@@ -96,7 +96,7 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
           />
 
           {/* Horizon Line */}
-          <div className="absolute bottom-10 inset-x-0 h-[1.5px] bg-[#A78040] opacity-60" />
+          <div className="absolute bottom-10 inset-x-0 h-[1.5px] bg-[var(--color-gold)] opacity-60" />
 
           {/* Official Seagull / Sea Waves Stroke */}
           <svg
@@ -107,7 +107,7 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
             {/* Wave 1 */}
             <path
               d="M 12 40 C 26 22, 48 18, 64 34 C 76 46, 88 56, 114 53 C 128 51, 142 63, 148 74 C 132 60, 114 62, 98 68 C 76 76, 56 68, 48 54 C 40 40, 26 36, 12 40 Z"
-              fill="#161617"
+              fill="var(--color-ink)"
               strokeDasharray="300"
               strokeDashoffset={waveDashoffset}
               className="transition-[stroke-dashoffset] duration-100 ease-out"
@@ -115,7 +115,7 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
             {/* Wave 2 */}
             <path
               d="M 28 62 C 38 82, 60 92, 88 88 C 112 84, 130 96, 138 108 C 124 94, 102 96, 84 99 C 62 103, 44 94, 34 78 C 30 72, 28 66, 28 62 Z"
-              fill="#825F27"
+              fill="var(--color-maroon)"
               strokeDasharray="300"
               strokeDashoffset={waveDashoffset}
               className="transition-[stroke-dashoffset] duration-100 ease-out"
@@ -124,21 +124,21 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
         </div>
 
         {/* Wordmark & Subtitle */}
-        <div className="text-2xl font-black tracking-widest text-[#161617] mb-1">
+        <div className="text-2xl font-black tracking-widest text-[var(--color-ink)] mb-1">
           SEA BREW
         </div>
-        <div className="text-[10px] uppercase font-bold tracking-[0.2em] text-[#825F27] mb-3">
+        <div className="text-[10px] uppercase font-bold tracking-[0.2em] text-[var(--color-maroon)] mb-3">
           sea brew a coffee based drink
         </div>
 
         {/* Persian Counter ۰ -> ۱۰۰ */}
-        <div className="font-bold text-3xl text-[#161617] mb-4 tabular-nums">
+        <div className="font-bold text-3xl text-[var(--color-ink)] mb-4 tabular-nums">
           <span>{toPersianDigits(percent)}</span>
-          <span className="text-sm ms-1 text-[#825F27]">٪</span>
+          <span className="text-sm ms-1 text-[var(--color-maroon)]">٪</span>
         </div>
 
         {/* Skip prompt */}
-        <span className="text-xs text-[#825F27] font-medium opacity-60">
+        <span className="text-xs text-[var(--color-maroon)] font-medium opacity-60">
           برای رد شدن کلیک کنید
         </span>
       </div>

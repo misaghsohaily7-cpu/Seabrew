@@ -14,9 +14,11 @@ export const SeaBrewLogo: React.FC<SeaBrewLogoProps> = ({
   size = 'md',
 }) => {
   const isDark = theme === 'dark';
-  const waveColor = isDark ? '#161617' : '#FFFADE';
-  const textColor = isDark ? '#161617' : '#FFFADE';
-  const sunColor = '#FDB716';
+  // theme="dark"  → logo sits on a LIGHT surface (navbar) → flips with the theme
+  // theme="light" → logo sits on a DARK section (footer/story) → fixed cream
+  const waveColor = isDark ? 'var(--color-ink)' : 'var(--color-cream-fixed)';
+  const textColor = isDark ? 'var(--color-ink)' : 'var(--color-cream-fixed)';
+  const sunColor = 'var(--color-sun)';
 
   const scaleMap = {
     sm: 'h-8',

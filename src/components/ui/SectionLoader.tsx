@@ -12,12 +12,13 @@ export const SectionLoader: React.FC<SectionLoaderProps> = ({
   theme = 'warm',
   minHeight = 'min-h-[60vh]',
 }) => {
+  // 'dark' stays hardcoded — it belongs to the always-dark narrative sections
   const bgClass =
     theme === 'dark'
       ? 'bg-[#161617] text-[#FFFADE]'
       : theme === 'light'
-      ? 'bg-[#FFFADE] text-[#161617]'
-      : 'bg-[#C9B8B6]/20 text-[#825F27]';
+      ? 'bg-[var(--color-cream)] text-[var(--color-ink)]'
+      : 'bg-[var(--color-dust)]/20 text-[var(--color-maroon)]';
 
   return (
     <div
@@ -27,9 +28,9 @@ export const SectionLoader: React.FC<SectionLoaderProps> = ({
     >
       <div className="flex flex-col items-center gap-5">
         <div className="relative flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full border-2 border-dashed border-[#FDB716]/60 animate-spin" style={{ animationDuration: '6s' }} />
+          <div className="w-12 h-12 rounded-full border-2 border-dashed border-[var(--color-sun)]/60 animate-spin" style={{ animationDuration: '6s' }} />
           <div className="absolute">
-            <SunDot size="sm" pulse={true} glow={true} color="#FDB716" />
+            <SunDot size="sm" pulse={true} glow={true} color="var(--color-sun)" />
           </div>
         </div>
 
@@ -40,9 +41,9 @@ export const SectionLoader: React.FC<SectionLoaderProps> = ({
         )}
 
         <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#A78040] animate-pulse" />
-          <span className="w-1.5 h-1.5 rounded-full bg-[#FDB716] animate-pulse" style={{ animationDelay: '200ms' }} />
-          <span className="w-1.5 h-1.5 rounded-full bg-[#A78040] animate-pulse" style={{ animationDelay: '400ms' }} />
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-gold)] animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-sun)] animate-pulse" style={{ animationDelay: '200ms' }} />
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-gold)] animate-pulse" style={{ animationDelay: '400ms' }} />
         </div>
       </div>
     </div>

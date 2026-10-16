@@ -12,8 +12,8 @@ export const TideLine: React.FC<TideLineProps> = ({
   className = '',
   sunPosition,
   trackScrollProgress = false,
-  color = '#A78040',
-  sunColor = '#FDB716',
+  color = 'var(--color-gold)',
+  sunColor = 'var(--color-sun)',
 }) => {
   const [scrollProgress, setScrollProgress] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);

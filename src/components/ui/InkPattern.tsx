@@ -13,7 +13,7 @@ interface PatternProps {
 export const InkCoffeeBranch: React.FC<PatternProps> = ({
   className = 'w-10 h-10',
   strokeWidth = 1.5,
-  color = '#A78040',
+  color = 'var(--color-gold)',
   ariaHidden = true,
 }) => (
   <svg
@@ -59,7 +59,7 @@ export const InkCoffeeBranch: React.FC<PatternProps> = ({
 export const InkLeaf: React.FC<PatternProps> = ({
   className = 'w-8 h-8',
   strokeWidth = 1.5,
-  color = '#A78040',
+  color = 'var(--color-gold)',
   ariaHidden = true,
 }) => (
   <svg
@@ -103,7 +103,7 @@ export const InkLeaf: React.FC<PatternProps> = ({
 export const InkBeanStem: React.FC<PatternProps> = ({
   className = 'w-9 h-9',
   strokeWidth = 1.5,
-  color = '#A78040',
+  color = 'var(--color-gold)',
   ariaHidden = true,
 }) => (
   <svg
@@ -160,7 +160,7 @@ export const InkBeanStem: React.FC<PatternProps> = ({
 export const InkSeaWave: React.FC<PatternProps> = ({
   className = 'w-full h-8',
   strokeWidth = 1.5,
-  color = '#A78040',
+  color = 'var(--color-gold)',
   ariaHidden = true,
 }) => (
   <svg
@@ -185,7 +185,7 @@ export const InkSeaWave: React.FC<PatternProps> = ({
 export const InkArchOutline: React.FC<PatternProps> = ({
   className = 'w-16 h-24',
   strokeWidth = 1.5,
-  color = '#A78040',
+  color = 'var(--color-gold)',
   ariaHidden = true,
 }) => (
   <svg

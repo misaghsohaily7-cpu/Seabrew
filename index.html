@@ -8,7 +8,7 @@
     <link rel="preload" href="/fonts/Estedad-VF.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
 
     <title>SEA BREW | نوشیدنی قهوه‌ای از ساحل جنوب</title>
-    <meta name="description" content="وبسایت رسمی برند SEA BREW — نوشیدنی قهوه‌ای آماده‌مصرف از بوشهر، جنوب ایران. تجربه ساحلی، مدرن و سینمایی با الهام از دریای گرم خلیج فارس." />
+    <meta name="description" content="وبسایت رسمی برند SEA BREW — قهوه‌ای دم‌کشیده در آفتاب جنوب از بوشهر، جنوب ایران. تجربه ساحلی، مدرن و سینمایی با الهام از دریای گرم خلیج فارس." />
     
     <!-- Theme color -->
     <meta name="theme-color" content="#FFFADE" media="(prefers-color-scheme: light)" />
@@ -18,7 +18,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="fa_IR" />
     <meta property="og:title" content="SEA BREW | نوشیدنی قهوه‌ای از ساحل جنوب" />
-    <meta property="og:description" content="وبسایت رسمی برند SEA BREW — نوشیدنی قهوه‌ای آماده‌مصرف از بوشهر، جنوب ایران." />
+    <meta property="og:description" content="وبسایت رسمی برند SEA BREW — قهوه‌ای دم‌کشیده در آفتاب جنوب از بوشهر، جنوب ایران." />
     <meta property="og:image" content="https://seabrew.ir/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -27,8 +27,26 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="SEA BREW | نوشیدنی قهوه‌ای از ساحل جنوب" />
-    <meta name="twitter:description" content="وبسایت رسمی برند SEA BREW — نوشیدنی قهوه‌ای آماده‌مصرف از بوشهر، جنوب ایران." />
+    <meta name="twitter:description" content="وبسایت رسمی برند SEA BREW — قهوه‌ای دم‌کشیده در آفتاب جنوب از بوشهر، جنوب ایران." />
     <meta name="twitter:image" content="https://seabrew.ir/og-image.png" />
+
+    <!-- Theme boot: resolve light/dark before first paint (no flash) -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('sea-brew-theme');
+          var theme =
+            stored === 'dark' || stored === 'light'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -42,11 +60,11 @@
       "name": "SEA BREW",
       "alternateName": "سی برو",
       "url": "https://seabrew.ir/",
-      "description": "نوشیدنی قهوه‌ای آماده‌مصرف از بوشهر، جنوب ایران."
+      "description": "قهوه‌ای دم‌کشیده در آفتاب جنوب از بوشهر، جنوب ایران."
     }
     </script>
   </head>
-  <body class="bg-[#FFFADE] text-[#161617] font-['Estedad'] selection:bg-[#A78040] selection:text-[#FFFADE]">
+  <body class="bg-[var(--color-cream)] text-[var(--color-ink)] font-['Estedad'] selection:bg-[var(--color-gold)] selection:text-[var(--color-ink)]">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -5,12 +5,18 @@ interface Glass2DCanvasProps {
   progress: number; // 0.08 to 0.96
   isPouring?: boolean;
   className?: string;
+  /** Product accent colour — tints the drink so each recipe looks different */
+  tint?: string;
+  /** Product id — decides which ingredients float in the glass */
+  recipe?: string;
 }
 
 export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
   progress,
   isPouring = false,
   className = '',
+  tint = '#C95F24',
+  recipe = 'vigor',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -29,6 +35,8 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
   const [tilt, setTilt] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const isInteractingRef = useRef<boolean>(false);
 
+  const waveSpeedRef = useRef<number>(2.0);
+
   // Animation loop for wave motion & progress lerp
   useEffect(() => {
     let animId: number;
@@ -44,12 +52,14 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
       setSmoothProgress((prev) => {
         const diff = targetProgressRef.current - prev;
         if (Math.abs(diff) < 0.001) return targetProgressRef.current;
-        return prev + diff * (isReduced ? 0.25 : 0.12);
+        return prev + diff * (isReduced ? 0.3 : 0.15);
       });
 
-      // Advance wave phase
+      // Advance wave phase — the speed itself is eased so pouring never jolts
       if (!isReduced) {
-        setWavePhase((prev) => (prev + dt * (isPouring ? 4.5 : 2.0)) % (Math.PI * 2));
+        const targetSpeed = isPouring ? 4.5 : 2.0;
+        waveSpeedRef.current += (targetSpeed - waveSpeedRef.current) * Math.min(1, dt * 2.2);
+        setWavePhase((prev) => (prev + dt * waveSpeedRef.current) % (Math.PI * 2));
       }
 
       animId = requestAnimationFrame(loop);
@@ -91,7 +101,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
   const isReduced = getReducedMotionPreference();
   const waveAmp = isReduced ? 0 : isPouring ? 7 : 3.5;
   const waveOffset1 = Math.sin(wavePhase) * waveAmp;
-  const waveOffset2 = Math.cos(wavePhase * 1.3) * waveAmp * 0.8;
+  const waveOffset2 = Math.cos(wavePhase * 2) * waveAmp * 0.8;
 
   // Calculate inner width at current liquid level (tapered glass profile)
   // At BOTTOM_INNER_Y (388): left=118, right=242 (width=124)
@@ -104,28 +114,32 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
   // Floating Ice Cubes Physics
   const ice1RestY = 350;
   const ice1TargetY = Math.max(160, Math.min(ice1RestY, liquidLevelY + 30));
-  const ice1Y = liquidHeight > 45 ? ice1TargetY : ice1RestY;
-  const ice1Rot = -12 + (liquidHeight > 45 ? Math.sin(wavePhase * 0.8) * 5 : 0);
+  const ice1T = Math.min(1, Math.max(0, (liquidHeight - 25) / 40));
+  const ice1Y = ice1RestY + (ice1TargetY - ice1RestY) * ice1T + Math.sin(wavePhase * 2) * 2.5 * ice1T;
+  const ice1Rot = -12 + Math.sin(wavePhase * 1) * 5 * ice1T;
 
   const ice2RestY = 340;
   const ice2TargetY = Math.max(175, Math.min(ice2RestY, liquidLevelY + 50));
-  const ice2Y = liquidHeight > 65 ? ice2TargetY : ice2RestY;
-  const ice2Rot = 16 + (liquidHeight > 65 ? Math.cos(wavePhase * 0.9) * 6 : 0);
+  const ice2T = Math.min(1, Math.max(0, (liquidHeight - 45) / 40));
+  const ice2Y = ice2RestY + (ice2TargetY - ice2RestY) * ice2T + Math.cos(wavePhase * 3) * 2.2 * ice2T;
+  const ice2Rot = 16 + Math.cos(wavePhase * 2) * 6 * ice2T;
 
   const ice3RestY = 320;
   const ice3TargetY = Math.max(140, Math.min(ice3RestY, liquidLevelY + 22));
-  const ice3Y = liquidHeight > 85 ? ice3TargetY : ice3RestY;
-  const ice3Rot = 8 + (liquidHeight > 85 ? Math.sin(wavePhase * 1.1 + 1) * 4 : 0);
+  const ice3T = Math.min(1, Math.max(0, (liquidHeight - 65) / 40));
+  const ice3Y = ice3RestY + (ice3TargetY - ice3RestY) * ice3T + Math.sin(wavePhase * 4 + 1) * 2.8 * ice3T;
+  const ice3Rot = 8 + Math.sin(wavePhase * 3 + 1) * 4 * ice3T;
 
   // Floating Strawberry Slice
   const strawRestY = 345;
   const strawTargetY = Math.max(130, Math.min(strawRestY, liquidLevelY + 18));
-  const strawY = liquidHeight > 55 ? strawTargetY : strawRestY;
-  const strawRot = -18 + (liquidHeight > 55 ? Math.sin(wavePhase * 1.2) * 6 : 0);
+  const strawT = Math.min(1, Math.max(0, (liquidHeight - 35) / 40));
+  const strawY = strawRestY + (strawTargetY - strawRestY) * strawT + Math.sin(wavePhase * 3 + 0.6) * 2 * strawT;
+  const strawRot = -18 + Math.sin(wavePhase * 2) * 6 * strawT;
 
   // Floating Roasted Coffee Beans
   const bean1Y = Math.max(180, Math.min(360, liquidLevelY + 80 + Math.sin(wavePhase) * 6));
-  const bean2Y = Math.max(200, Math.min(370, liquidLevelY + 115 + Math.cos(wavePhase * 0.7) * 7));
+  const bean2Y = Math.max(200, Math.min(370, liquidLevelY + 115 + Math.cos(wavePhase * 2) * 7));
 
   // Condensation droplets: 28 droplets along glass outer profile
   const droplets = useMemo(() => {
@@ -253,7 +267,7 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
 
             {/* 6. Contact Amber Caustic Glow */}
             <radialGradient id="caustic-pool" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#fdb716" stopOpacity="0.45" />
+              <stop offset="0%" stopColor={tint} stopOpacity="0.4" />
               <stop offset="45%" stopColor="#825f27" stopOpacity="0.25" />
               <stop offset="75%" stopColor="#161617" stopOpacity="0.15" />
               <stop offset="100%" stopColor="#161617" stopOpacity="0" />
@@ -353,6 +367,17 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
               fill="url(#crema-shimmer)"
             />
 
+            {/* Product tint wash — the drink takes the recipe's colour */}
+            <rect
+              x="0"
+              y={Math.max(0, liquidLevelY - 4)}
+              width="360"
+              height={Math.max(0, 480 - (liquidLevelY - 4))}
+              fill={tint}
+              opacity="0.3"
+              style={{ mixBlendMode: 'color', transition: 'fill 600ms ease' }}
+            />
+
             {/* Micro Effervescence Bubbles at Meniscus Edge */}
             <circle cx={currentLeftX + 12} cy={liquidLevelY + waveOffset1 + 1} r="1.6" fill="#fef08a" opacity="0.8" />
             <circle cx={currentLeftX + 24} cy={liquidLevelY + waveOffset1 + 2} r="1.2" fill="#fef08a" opacity="0.6" />
@@ -424,44 +449,67 @@ export const Glass2DCanvas: React.FC<Glass2DCanvasProps> = ({
               <rect x="-11" y="-10" width="22" height="20" rx="2" fill="none" stroke="#ffffff" strokeWidth="0.8" strokeOpacity="0.6" />
             </g>
 
-            {/* FRESH STRAWBERRY SLICE (Floating near liquid surface) */}
-            <g
-              transform={`translate(195, ${strawY}) rotate(${strawRot}) scale(0.85)`}
-              className="transition-transform duration-150"
-            >
-              {/* Red strawberry flesh */}
-              <path
-                d="M 0 -24 C 18 -24 24 2 0 24 C -24 2 -18 -24 0 -24 Z"
-                fill="#dc2626"
-                stroke="#b91c1c"
-                strokeWidth="1.2"
-              />
-              {/* Inner core pattern */}
-              <path
-                d="M 0 -16 C 10 -16 14 0 0 16 C -14 0 -10 -16 0 -16 Z"
-                fill="#fca5a5"
-                fillOpacity="0.7"
-              />
-              {/* Golden seeds */}
-              <circle cx="-6" cy="-8" r="1" fill="#fef08a" />
-              <circle cx="6" cy="-8" r="1" fill="#fef08a" />
-              <circle cx="-8" cy="2" r="1" fill="#fef08a" />
-              <circle cx="8" cy="2" r="1" fill="#fef08a" />
-              <circle cx="0" cy="-2" r="1.1" fill="#fef08a" />
-              <circle cx="-4" cy="10" r="0.9" fill="#fef08a" />
-              <circle cx="4" cy="10" r="0.9" fill="#fef08a" />
-            </g>
+            {/* Recipe ingredient — the tab decides what floats in the drink */}
+            {recipe === 'bloom' && (
+              <g transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
+                <path d="M -4 -3 C -9 -15, 1 -22, 10 -20" stroke="#4C7A3A" strokeWidth="1.7" fill="none" strokeLinecap="round" />
+                <path d="M 9 -2 C 10 -11, 12 -16, 10 -20" stroke="#4C7A3A" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+                <circle cx="-8" cy="6" r="10" fill="#B01E42" stroke="#7A0F2A" strokeWidth="1.2" />
+                <circle cx="9" cy="9" r="9" fill="#C42A50" stroke="#7A0F2A" strokeWidth="1.2" />
+                <ellipse cx="-12" cy="2" rx="2.6" ry="1.8" fill="#FFFFFF" opacity="0.45" />
+              </g>
+            )}
 
-            {/* ROASTED SPECIALTY COFFEE BEAN 1 */}
-            <g transform={`translate(135, ${bean1Y}) rotate(32) scale(0.9)`}>
-              <ellipse cx="0" cy="0" rx="9" ry="13" fill="#241004" stroke="#451a03" strokeWidth="1" />
-              <path d="M 0 -10 C 3 -4 -3 4 0 10" stroke="#78350f" strokeWidth="1.4" fill="none" />
-            </g>
+            {recipe === 'apex' && (
+              <g transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
+                <circle cx="0" cy="0" r="15" fill="#F0A83A" stroke="#C97B18" strokeWidth="1.4" />
+                <circle cx="0" cy="0" r="11" fill="#FFC96B" opacity="0.85" />
+                <path d="M 0 -11 L 0 11 M -11 0 L 11 0 M -8 -8 L 8 8 M 8 -8 L -8 8" stroke="#E08E22" strokeWidth="1.1" />
+                <circle cx="0" cy="0" r="3.2" fill="#FFF3D6" />
+              </g>
+            )}
 
-            {/* ROASTED SPECIALTY COFFEE BEAN 2 */}
-            <g transform={`translate(225, ${bean2Y}) rotate(-24) scale(0.85)`}>
-              <ellipse cx="0" cy="0" rx="8.5" ry="12" fill="#241004" stroke="#451a03" strokeWidth="1" />
-              <path d="M 0 -9 C -3 -3 3 3 0 9" stroke="#78350f" strokeWidth="1.4" fill="none" />
+            {recipe === 'focus' && (
+              <g transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
+                <path d="M 0 -20 C 16 -12, 16 8, 0 20 C -16 8, -16 -12, 0 -20 Z" fill="#5F8C39" stroke="#3F6323" strokeWidth="1.3" />
+                <path d="M 0 -18 L 0 18" stroke="#9CCB6E" strokeWidth="1.2" />
+                <path d="M 0 -8 L 8 -2 M 0 2 L -8 8 M 0 -1 L 7 4" stroke="#9CCB6E" strokeWidth="0.9" />
+              </g>
+            )}
+
+            {recipe === 'grace' && (
+              <g transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
+                <circle cx="-9" cy="2" r="8" fill="#5B2A5E" stroke="#3A1740" strokeWidth="1.1" />
+                <circle cx="8" cy="-3" r="7.5" fill="#7C3A8E" stroke="#3A1740" strokeWidth="1.1" />
+                <circle cx="2" cy="10" r="7" fill="#4A1F55" stroke="#3A1740" strokeWidth="1.1" />
+                <ellipse cx="-12" cy="-2" rx="2" ry="1.4" fill="#FFFFFF" opacity="0.35" />
+              </g>
+            )}
+
+            {recipe === 'haven' && (
+              <g transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
+                <path d="M 0 -22 C 12 -10, 12 10, 0 22 C -12 10, -12 -10, 0 -22 Z" fill="#3E8C78" stroke="#245C4D" strokeWidth="1.3" />
+                <path d="M 0 -19 L 0 19" stroke="#9AD6C6" strokeWidth="1.1" />
+                <path d="M 0 -6 L 7 -1 M 0 4 L -7 9" stroke="#9AD6C6" strokeWidth="0.9" />
+              </g>
+            )}
+
+            {recipe === 'vigor' && (
+              <g transform={`translate(195, ${strawY}) rotate(${strawRot})`}>
+                <ellipse cx="0" cy="0" rx="11" ry="15" fill="#241004" stroke="#451a03" strokeWidth="1.2" />
+                <path d="M 0 -12 C 4 -5 -4 5 0 12" stroke="#8A4310" strokeWidth="1.6" fill="none" />
+                <ellipse cx="-4" cy="-7" rx="2" ry="1.4" fill="#FFFFFF" opacity="0.18" />
+              </g>
+            )}
+
+            {/* small recipe accents (same buoyancy as the hero ingredient) */}
+            <g transform={`translate(135, ${bean1Y}) rotate(32)`}>
+              <ellipse cx="0" cy="0" rx="7.5" ry="10.5" fill={tint} stroke="#00000044" strokeWidth="1" />
+              <ellipse cx="-2" cy="-4" rx="1.8" ry="1.2" fill="#FFFFFF" opacity="0.25" />
+            </g>
+            <g transform={`translate(225, ${bean2Y}) rotate(-24)`}>
+              <ellipse cx="0" cy="0" rx="6.8" ry="9.6" fill={tint} stroke="#00000044" strokeWidth="1" />
+              <ellipse cx="-2" cy="-3" rx="1.6" ry="1.1" fill="#FFFFFF" opacity="0.25" />
             </g>
           </g>
 

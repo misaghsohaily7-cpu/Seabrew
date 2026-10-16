@@ -4,7 +4,6 @@ import { Preloader } from './components/ui/Preloader';
 import { CustomCursor } from './components/ui/Cursor';
 import { NavBar } from './components/ui/NavBar';
 import { Hero } from './components/sections/Hero';
-import { Statement } from './components/sections/Statement';
 import { Marquee } from './components/ui/Marquee';
 import { Footer } from './components/ui/Footer';
 import { SunScrollIndicator } from './components/ui/SunScrollIndicator';
@@ -13,9 +12,6 @@ import { ArchDivider } from './components/ui/ArchDivider';
 import { registerMotionPlugins, prefersReducedMotion } from './lib/motion';
 
 // Lazy-loaded visual and narrative sections for performance & rapid initial hydration
-const Interlude = lazy(() =>
-  import('./components/sections/Interlude').then((m) => ({ default: m.Interlude }))
-);
 const Drinks = lazy(() =>
   import('./components/sections/Drinks').then((m) => ({ default: m.Drinks }))
 );
@@ -24,9 +20,6 @@ const ProductMoment = lazy(() =>
 );
 const Story = lazy(() =>
   import('./components/sections/Story').then((m) => ({ default: m.Story }))
-);
-const FindUs = lazy(() =>
-  import('./components/sections/FindUs').then((m) => ({ default: m.FindUs }))
 );
 const Contact = lazy(() =>
   import('./components/sections/Contact').then((m) => ({ default: m.Contact }))
@@ -44,28 +37,18 @@ export default function App() {
     const smoother = ScrollSmoother.create({
       wrapper: '#smooth-wrapper',
       content: '#smooth-content',
-      smooth: 1.15,
+      smooth: 1.3,
       effects: true,
       smoothTouch: 0.1,
     });
 
-    const handleMotionToggle = (e: Event) => {
-      const detail = (e as CustomEvent<{ reduced: boolean }>).detail;
-      if (detail.reduced) {
-        smoother.kill();
-      }
-    };
-
-    window.addEventListener('sea_brew_motion_toggle', handleMotionToggle);
-
     return () => {
-      window.removeEventListener('sea_brew_motion_toggle', handleMotionToggle);
       smoother.kill();
     };
   }, []);
 
   return (
-    <div className="relative min-h-screen w-full bg-[#FFFADE] text-[#161617] font-['Estedad'] antialiased selection:bg-[#A78040] selection:text-[#FFFADE]">
+    <div className="relative min-h-screen w-full bg-[var(--color-cream)] text-[var(--color-ink)] font-['Estedad'] antialiased selection:bg-[var(--color-gold)] selection:text-[var(--color-cream)]">
       {/* 1. Sunrise Preloader (≤2.5s, skippable on click, bypassed on reduced-motion) */}
       <Preloader onComplete={() => setIntroReady(true)} />
 
@@ -78,41 +61,22 @@ export default function App() {
       {/* 4. Smooth Scrolling Container */}
       <div id="smooth-wrapper" className="w-full overflow-hidden">
         <div id="smooth-content" className="w-full will-change-transform">
-          {/* Main Page Structure — 8 Sections in Chronological Day-to-Night Narrative */}
+          {/* Main Page Structure — Chronological Narrative: Hero -> Products -> Anatomy -> Story */}
           <main id="main-content" role="main">
             {/* Section 1: Hero (Morning light, cream) */}
             <Hero introReady={introReady} />
 
-            {/* Section 2: Statement (Single sentence, cream, scrub word by word) */}
-            <Statement />
+            {/* Marquee Ticker: brand signature */}
+            <Marquee bg="bg-[var(--color-dust)]/30" textColor="text-[var(--color-maroon)]" />
 
-            {/* Arch Divider: Statement -> Interlude */}
-            <ArchDivider variant="cream-to-warm" label="چشم‌انداز ساحل بوشهر" />
+            {/* Arch Divider: Hero -> Products */}
+            <ArchDivider variant="warm" label="محصولات SEA BREW" />
 
-            {/* Section 3: Interlude (Cream -> Warm, full width SVG scene, 3-layer parallax) */}
+            {/* Section 2: Products (Warm phase, unified product template grid) */}
             <Suspense
               fallback={
                 <SectionLoader
-                  title="بارگذاری چشم‌انداز ساحلی بوشهر..."
-                  theme="warm"
-                  minHeight="min-h-[70vh]"
-                />
-              }
-            >
-              <Interlude />
-            </Suspense>
-
-            {/* Marquee Ticker: Warm phase transition */}
-            <Marquee bg="bg-[#C9B8B6]/30" textColor="text-[#825F27]" />
-
-            {/* Arch Divider: Marquee -> Drinks */}
-            <ArchDivider variant="warm" label="مجموعه نوشیدنی‌های ساحلی" />
-
-            {/* Section 4: Drinks (Warm phase, two arch cards, horizontal scrub pin on desktop) */}
-            <Suspense
-              fallback={
-                <SectionLoader
-                  title="بارگذاری نوشیدنی‌های ساحلی..."
+                  title="بارگذاری محصولات SEA BREW..."
                   theme="warm"
                   minHeight="min-h-[80vh]"
                 />
@@ -121,10 +85,10 @@ export default function App() {
               <Drinks />
             </Suspense>
 
-            {/* Arch Divider: Drinks -> Product Moment */}
-            <ArchDivider variant="warm-to-gold" label="هنر دم‌آوری پیاله کلدبرو" />
+            {/* Arch Divider: Products -> Product Moment */}
+            <ArchDivider variant="warm-to-gold" label="هنر دم‌آوری سرد" />
 
-            {/* Section 5: Product Moment (Hero masterpiece, liquid rise scrub, flavor tags popup) */}
+            {/* Section 3: Product Moment (Hero masterpiece, liquid rise scrub, flavor tags popup) */}
             <Suspense
               fallback={
                 <SectionLoader
@@ -138,9 +102,9 @@ export default function App() {
             </Suspense>
 
             {/* Arch Divider: Product Moment -> Story */}
-            <ArchDivider variant="gold-to-dark" label="روایت سه‌گانه ریشه‌ها" />
+            <ArchDivider variant="gold-to-dark" label="روایت ما" />
 
-            {/* Section 6: Story (Warm -> Dark transition, 3 chapters, arch dark rise) */}
+            {/* Section 4: Story (Warm -> Dark transition, 3 chapters, arch dark rise) */}
             <Suspense
               fallback={
                 <SectionLoader
@@ -153,20 +117,7 @@ export default function App() {
               <Story />
             </Suspense>
 
-            {/* Section 7: Find Us (Dark, store & cafe list, commercial clarity, hover arch panel) */}
-            <Suspense
-              fallback={
-                <SectionLoader
-                  title="نقشه شعب و مراکز عرضه..."
-                  theme="dark"
-                  minHeight="min-h-[60vh]"
-                />
-              }
-            >
-              <FindUs />
-            </Suspense>
-
-            {/* Section 8: Contact (Dark ink, static form + direct channels) */}
+            {/* Section 5: Contact (Dark ink, static form + direct channels) */}
             <Suspense
               fallback={
                 <SectionLoader

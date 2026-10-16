@@ -26,12 +26,12 @@ export const Story: React.FC = () => {
           {
             opacity: 1,
             y: 0,
-            duration: 0.95,
-            stagger: 0.16,
+            duration: 0.42,
+            stagger: 0.06,
             ease: 'tide',
             scrollTrigger: {
               trigger: headerRef.current,
-              start: 'top 85%',
+              start: 'top 96%',
               toggleActions: 'play none none reverse',
             },
           }
@@ -46,12 +46,12 @@ export const Story: React.FC = () => {
             opacity: 1,
             y: 0,
             scale: 1,
-            duration: 1.0,
-            stagger: 0.2,
+            duration: 0.45,
+            stagger: 0.05,
             ease: 'tide',
             scrollTrigger: {
               trigger: chaptersContainerRef.current,
-              start: 'top 80%',
+              start: 'top 95%',
               toggleActions: 'play none none reverse',
             },
           }
@@ -88,7 +88,7 @@ export const Story: React.FC = () => {
             ease: 'pour',
             scrollTrigger: {
               trigger: darkTransitionPanelRef.current,
-              start: 'top 90%',
+              start: 'top 95%',
               end: 'bottom bottom',
               scrub: 1.2,
             },
@@ -106,12 +106,12 @@ export const Story: React.FC = () => {
           {
             opacity: 1,
             y: 0,
-            duration: 0.75,
-            stagger: 0.12,
+            duration: 0.4,
+            stagger: 0.05,
             ease: 'tide',
             scrollTrigger: {
               trigger: headerRef.current,
-              start: 'top 88%',
+              start: 'top 97%',
             },
           }
         );
@@ -124,12 +124,12 @@ export const Story: React.FC = () => {
           {
             opacity: 1,
             y: 0,
-            duration: 0.75,
-            stagger: 0.15,
+            duration: 0.4,
+            stagger: 0.08,
             ease: 'tide',
             scrollTrigger: {
               trigger: chaptersContainerRef.current,
-              start: 'top 85%',
+              start: 'top 96%',
             },
           }
         );
@@ -142,11 +142,11 @@ export const Story: React.FC = () => {
           {
             opacity: 1,
             y: 0,
-            duration: 0.8,
+            duration: 0.42,
             ease: 'tide',
             scrollTrigger: {
               trigger: darkTransitionPanelRef.current,
-              start: 'top 92%',
+              start: 'top 97%',
             },
           }
         );
