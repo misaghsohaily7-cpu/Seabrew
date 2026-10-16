@@ -49,11 +49,11 @@ export const ArchDivider: React.FC<ArchDividerProps> = ({
           dotColor: 'bg-[var(--color-sun)]',
         };
       case 'dark':
-        // Stays hardcoded — this divider belongs to the always-dark narrative sections
+        // Solid surface for the story/contact/footer section transition.
         return {
           wrapperBg: 'bg-[#161617]',
-          lineGrad: 'from-transparent via-[#A78040]/30 to-[#A78040]/50',
-          archBg: 'bg-[#1e1e20] backdrop-blur-xs',
+          lineGrad: '',
+          archBg: 'bg-[#1e1e20]',
           archBorder: 'border-[#A78040]/40',
           textColor: 'text-[#FFFADE]/80',
           dotColor: 'bg-[#FDB716]',
@@ -82,7 +82,7 @@ export const ArchDivider: React.FC<ArchDividerProps> = ({
       <div className="relative flex items-center justify-center w-full max-w-5xl px-6 sm:px-10">
         {/* Left tapering dividing rule */}
         <div
-          className={`flex-1 h-[1px] bg-gradient-to-r ${theme.lineGrad} opacity-70`}
+          className={`flex-1 h-[1px] ${variant === 'dark' ? 'bg-[#A78040]/30' : `bg-gradient-to-r ${theme.lineGrad}`} opacity-70`}
         />
 
         {/* Center architectural arch motif using .arch-frame */}
@@ -131,7 +131,7 @@ export const ArchDivider: React.FC<ArchDividerProps> = ({
 
         {/* Right tapering dividing rule */}
         <div
-          className={`flex-1 h-[1px] bg-gradient-to-l ${theme.lineGrad} opacity-70`}
+          className={`flex-1 h-[1px] ${variant === 'dark' ? 'bg-[#A78040]/30' : `bg-gradient-to-l ${theme.lineGrad}`} opacity-70`}
         />
       </div>
     </div>

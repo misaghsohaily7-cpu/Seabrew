@@ -107,10 +107,14 @@ export default function App() {
               <ProductMoment />
             </Suspense>
 
-            {/* Arch Divider: Product Moment -> Story */}
-            <ArchDivider variant="gold-to-dark" label="روایت ما" />
+            {/* Solid dark transition: Story, Contact and Footer share one surface */}
+            <ArchDivider
+              variant="dark"
+              label="روایت ما"
+              className="border-t border-[#A78040]/15"
+            />
 
-            {/* Section 4: Story (Warm -> Dark transition, 3 chapters, arch dark rise) */}
+            {/* Section 4: Story (clean dark narrative, continuous into contact/footer) */}
             <Suspense
               fallback={
                 <SectionLoader
