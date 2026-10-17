@@ -160,11 +160,14 @@ body {
   0%, 100% {
     transform: rotate(0deg);
   }
-  25% {
-    transform: rotate(-6deg);
+  24% {
+    transform: rotate(-15deg);
   }
-  75% {
-    transform: rotate(9deg);
+  52% {
+    transform: rotate(10deg);
+  }
+  78% {
+    transform: rotate(-8deg);
   }
 }
 
@@ -172,11 +175,14 @@ body {
   0%, 100% {
     transform: rotate(0deg);
   }
-  30% {
-    transform: rotate(10deg);
+  26% {
+    transform: rotate(13deg);
   }
-  70% {
-    transform: rotate(-7deg);
+  54% {
+    transform: rotate(-11deg);
+  }
+  80% {
+    transform: rotate(7deg);
   }
 }
 
@@ -184,24 +190,45 @@ body {
   0%, 100% {
     transform: rotate(0deg);
   }
-  20% {
-    transform: rotate(-5deg);
+  22% {
+    transform: rotate(-11deg);
+  }
+  52% {
+    transform: rotate(15deg);
   }
   80% {
-    transform: rotate(8deg);
+    transform: rotate(-9deg);
   }
+}
+
+.brand-button-plant {
+  transform-origin: bottom center;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .animate-sway-1 {
-  animation: sway-branch-1 2.9s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  animation: sway-branch-1 1.6s cubic-bezier(0.34, 1.3, 0.64, 1) infinite;
 }
 
 .animate-sway-2 {
-  animation: sway-branch-2 3.2s cubic-bezier(0.65, 0, 0.35, 1) 0.4s infinite;
+  animation: sway-branch-2 1.6s cubic-bezier(0.34, 1.3, 0.64, 1) 0.18s infinite;
 }
 
 .animate-sway-3 {
-  animation: sway-branch-3 3.4s cubic-bezier(0.65, 0, 0.35, 1) 0.8s infinite;
+  animation: sway-branch-3 1.6s cubic-bezier(0.34, 1.3, 0.64, 1) 0.36s infinite;
+}
+
+@keyframes brand-button-shimmer {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-brand-button-shimmer {
+  animation: brand-button-shimmer 2.5s cubic-bezier(0.65, 0, 0.35, 1) 1 both;
 }
 
 /* SunDot subtle glow animation */
@@ -351,6 +378,8 @@ body {
   .animate-sway-1,
   .animate-sway-2,
   .animate-sway-3,
+  .animate-brand-button-shimmer,
+  .brand-button-plant,
   .sun-dot-pulse {
     animation: none !important;
     transform: none !important;
