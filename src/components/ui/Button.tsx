@@ -27,6 +27,7 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
   ...rest
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [hoverCycle, setHoverCycle] = useState(0);
   const isPrimary = variant === 'primary';
 
   const elementRef = useRef<HTMLButtonElement & HTMLAnchorElement>(null);
@@ -58,7 +59,7 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
   // pill (rounded-full), font Estedad 600, 1rem, overflow: visible
   // warm shadow: drop-shadow(2px 2px 6px rgba(130,95,39,0.2))
   const containerClasses = `
-    group relative inline-flex items-center justify-center
+    group brand-button relative inline-flex items-center justify-center
     rounded-full font-semibold text-[1rem] leading-none select-none
     py-[15px] px-[45px] cursor-pointer will-change-transform
     transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.025] active:scale-[0.96]
@@ -85,7 +86,8 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
       >
         {/* Branch 1: Start corner (Coffee branch) */}
         <div
-          className={`absolute start-4 bottom-0 origin-bottom transition-transform ${
+          key={`coffee-${hoverCycle}`}
+          className={`brand-button-plant brand-button-plant--coffee absolute start-4 bottom-0 origin-bottom ${
             isHovered && !disabled ? 'animate-sway-1' : ''
           }`}
           style={{
@@ -104,7 +106,8 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
 
         {/* Branch 2: Middle (Leaf) */}
         <div
-          className={`absolute start-1/2 -translate-x-1/2 bottom-0 origin-bottom transition-transform ${
+          key={`leaf-${hoverCycle}`}
+          className={`brand-button-plant brand-button-plant--leaf absolute start-1/2 -translate-x-1/2 bottom-0 origin-bottom ${
             isHovered && !disabled ? 'animate-sway-2' : ''
           }`}
           style={{
@@ -123,7 +126,8 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
 
         {/* Branch 3: Near end corner (Bean stem) */}
         <div
-          className={`absolute end-5 bottom-0 origin-bottom transition-transform ${
+          key={`bean-${hoverCycle}`}
+          className={`brand-button-plant brand-button-plant--bean absolute end-5 bottom-0 origin-bottom ${
             isHovered && !disabled ? 'animate-sway-3' : ''
           }`}
           style={{
@@ -147,17 +151,16 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
         aria-hidden="true"
       >
         <div
+          key={`shimmer-${hoverCycle}`}
           className={`absolute inset-0 w-[200%] h-full transition-opacity duration-300 ${
-            isHovered && !disabled ? 'opacity-100' : 'opacity-0'
+            isHovered && !disabled
+              ? 'opacity-100 animate-brand-button-shimmer'
+              : 'opacity-0'
           }`}
           style={{
             background: isPrimary
               ? 'linear-gradient(90deg, var(--color-ink) 0%, var(--color-maroon) 50%, var(--color-ink) 100%)'
               : 'linear-gradient(90deg, var(--color-cream) 0%, #F5E9C0 50%, var(--color-cream) 100%)',
-            transform: isHovered && !disabled ? 'translateX(-50%)' : 'translateX(0%)',
-            transitionProperty: 'transform, opacity',
-            transitionDuration: isHovered ? '2.5s' : '0.5s',
-            transitionTimingFunction: 'cubic-bezier(0.65, 0, 0.35, 1)',
           }}
         />
       </div>
@@ -175,7 +178,15 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
     </>
   );
 
-  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    setHoverCycle((cycle) => cycle + 1);
+  };
+
+  const handleFocus = () => {
+    setIsHovered(true);
+    setHoverCycle((cycle) => cycle + 1);
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     if (!magnetic || !elementRef.current || prefersReducedMotion()) return;
@@ -184,9 +195,9 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
     const centerY = rect.top + rect.height / 2;
 
     // Strict boundary & pull constraints:
-    // Capped between -22px and +22px, gentle 0.25 tracking ratio
-    const MAX_DISPLACEMENT = 22;
-    const PULL_FACTOR = 0.25;
+    // Keep the visual pull inside the hover target so it cannot chase the pointer.
+    const MAX_DISPLACEMENT = 14;
+    const PULL_FACTOR = 0.2;
 
     const deltaX = (e.clientX - centerX) * PULL_FACTOR;
     const deltaY = (e.clientY - centerY) * PULL_FACTOR;
@@ -212,7 +223,6 @@ export const BrandButton: React.FC<BrandButtonProps> = ({
     });
   };
 
-  const handleFocus = () => setIsHovered(true);
   const handleBlur = () => {
     setIsHovered(false);
     if (elementRef.current && !prefersReducedMotion()) {
