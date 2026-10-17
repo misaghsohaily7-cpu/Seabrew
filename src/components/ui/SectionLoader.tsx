@@ -12,10 +12,9 @@ export const SectionLoader: React.FC<SectionLoaderProps> = ({
   theme = 'warm',
   minHeight = 'min-h-[60vh]',
 }) => {
-  // 'dark' stays hardcoded — it belongs to the always-dark narrative sections
   const bgClass =
     theme === 'dark'
-      ? 'bg-[#161617] text-[#FFFADE]'
+      ? 'bg-[var(--color-lower-surface)] text-[var(--color-lower-text)]'
       : theme === 'light'
       ? 'bg-[var(--color-cream)] text-[var(--color-ink)]'
       : 'bg-[var(--color-dust)]/20 text-[var(--color-maroon)]';

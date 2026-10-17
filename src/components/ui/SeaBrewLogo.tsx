@@ -3,7 +3,7 @@ import React from 'react';
 interface SeaBrewLogoProps {
   className?: string;
   variant?: 'vertical' | 'horizontal' | 'mark-only';
-  theme?: 'dark' | 'light';
+  theme?: 'dark' | 'light' | 'adaptive';
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
@@ -16,8 +16,14 @@ export const SeaBrewLogo: React.FC<SeaBrewLogoProps> = ({
   const isDark = theme === 'dark';
   // theme="dark"  → logo sits on a LIGHT surface (navbar) → flips with the theme
   // theme="light" → logo sits on a DARK section (footer/story) → fixed cream
-  const waveColor = isDark ? 'var(--color-ink)' : 'var(--color-cream-fixed)';
-  const textColor = isDark ? 'var(--color-ink)' : 'var(--color-cream-fixed)';
+  // theme="adaptive" → logo follows the theme-aware lower-page surface
+  const waveColor =
+    theme === 'adaptive'
+      ? 'var(--color-lower-text)'
+      : isDark
+      ? 'var(--color-ink)'
+      : 'var(--color-cream-fixed)';
+  const textColor = waveColor;
   const sunColor = 'var(--color-sun)';
 
   const scaleMap = {

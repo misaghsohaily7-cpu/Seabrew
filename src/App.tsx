@@ -83,14 +83,14 @@ export default function App() {
           <ProductMoment />
         </Suspense>
 
-        {/* Solid dark transition: Story, Contact and Footer share one surface */}
+        {/* Theme-aware transition: Story, Contact and Footer share one surface */}
         <ArchDivider
           variant="dark"
           label="روایت ما"
-          className="border-t border-[#A78040]/15"
+          className="border-t border-[var(--color-lower-gold)]/15"
         />
 
-        {/* Section 4: Story (clean dark narrative, continuous into contact/footer) */}
+        {/* Section 4: Story (continuous into contact/footer in either theme) */}
         <Suspense
           fallback={
             <SectionLoader
@@ -103,7 +103,7 @@ export default function App() {
           <Story />
         </Suspense>
 
-        {/* Section 5: Contact (Dark ink, static form + direct channels) */}
+        {/* Section 5: Contact (static form + direct channels) */}
         <Suspense
           fallback={
             <SectionLoader

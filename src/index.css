@@ -36,6 +36,17 @@
   --color-product-scroll-edge: #F1E6C8;
   --color-product-scroll-center: #E4D1A4;
   --color-product-muted: #654719;
+  --color-lower-surface: #F1E8D5;
+  --color-lower-card: #FAF4E3;
+  --color-lower-form: #F8F0DC;
+  --color-lower-text: #161617;
+  --color-lower-muted: #6A5F49;
+  --color-lower-lead: #5F4926;
+  --color-lower-accent: #73531E;
+  --color-lower-gold: #76561D;
+  --color-lower-input: #FFFADE;
+  --color-lower-placeholder: #766A53;
+  --color-lower-meta-opacity: 1;
   /* Mid-tone brand shades used by ArchDivider transitions */
   --color-parchment: #ece1cc;
   --color-dust-light: #D4C7C5;
@@ -44,9 +55,7 @@
   color-scheme: light;
 }
 
-/* Dark mode palette — applied via data-theme on <html>.
-   Light-phase surfaces flip to deep warm charcoal; dark-phase sections
-   (Story / Contact / Footer) stay hardcoded and remain legible. */
+/* Dark mode palette — applied via data-theme on <html>. */
 html[data-theme="dark"] {
   --color-cream: #131209;
   --color-ink: #F2EDDC;
@@ -58,6 +67,17 @@ html[data-theme="dark"] {
   --color-product-scroll-edge: #17150D;
   --color-product-scroll-center: #211C11;
   --color-product-muted: #D8AE6E;
+  --color-lower-surface: #161617;
+  --color-lower-card: #1E1E20;
+  --color-lower-form: #161617;
+  --color-lower-text: #FFFADE;
+  --color-lower-muted: #C9B8B6;
+  --color-lower-lead: #D8C3A0;
+  --color-lower-accent: #C89B5A;
+  --color-lower-gold: #A78040;
+  --color-lower-input: rgba(255, 250, 222, 0.1);
+  --color-lower-placeholder: rgba(201, 184, 182, 0.4);
+  --color-lower-meta-opacity: 0.6;
   --color-parchment: #2A251E;
   --color-dust-light: #2E2828;
   color-scheme: dark;

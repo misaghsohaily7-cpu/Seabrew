@@ -29,37 +29,37 @@ ${message}
   return (
     <section
       id="contact"
-      className="relative w-full bg-[#161617] text-[#FFFADE] py-28 px-[6vw] border-t border-[#A78040]/20 select-none"
+      className="relative w-full bg-[var(--color-lower-surface)] text-[var(--color-lower-text)] py-28 px-[6vw] border-t border-[var(--color-lower-gold)]/20 select-none"
       aria-label="بخش ارتباط و سفارش"
     >
       <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
         {/* Contact Info (RTL Start) */}
         <div className="lg:col-span-5 flex flex-col justify-between">
           <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-[#A78040] mb-3 flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-lower-gold)] mb-3 flex items-center gap-2">
               <SunDot size="sm" animate={false} />
               <span>{siteContent.contact.sectionTag}</span>
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#FFFADE] mb-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-[var(--color-lower-text)] mb-4">
               {siteContent.contact.heading}
             </h2>
-            <p className="text-base font-medium text-[#C9B8B6] leading-relaxed mb-8">
+            <p className="text-base font-medium text-[var(--color-lower-muted)] leading-relaxed mb-8">
               {siteContent.contact.subheading}
             </p>
           </div>
 
           {/* Direct channels */}
-          <div className="space-y-4 pt-4 border-t border-[#A78040]/20">
+          <div className="space-y-4 pt-4 border-t border-[var(--color-lower-gold)]/20">
             <a
               href={`https://wa.me/${siteContent.contact.direct.whatsapp.replace(/[^0-9]/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center justify-between text-sm py-2"
             >
-              <span className="text-[#C9B8B6] group-hover:text-[#FFFADE] transition-colors">
+              <span className="text-[var(--color-lower-muted)] group-hover:text-[var(--color-lower-text)] transition-colors">
                 {siteContent.contact.direct.whatsappLabel}
               </span>
-              <span dir="ltr" className="font-mono text-[#FFFADE] font-bold group-hover:text-[#A78040] transition-colors">
+              <span dir="ltr" className="font-mono text-[var(--color-lower-text)] font-bold group-hover:text-[var(--color-lower-gold)] transition-colors">
                 {siteContent.contact.direct.whatsapp}
               </span>
             </a>
@@ -70,10 +70,10 @@ ${message}
               rel="noopener noreferrer"
               className="group flex items-center justify-between text-sm py-2"
             >
-              <span className="text-[#C9B8B6] group-hover:text-[#FFFADE] transition-colors">
+              <span className="text-[var(--color-lower-muted)] group-hover:text-[var(--color-lower-text)] transition-colors">
                 {siteContent.contact.direct.instagramLabel}
               </span>
-              <span dir="ltr" className="font-mono text-[#FFFADE] font-bold group-hover:text-[#A78040] transition-colors">
+              <span dir="ltr" className="font-mono text-[var(--color-lower-text)] font-bold group-hover:text-[var(--color-lower-gold)] transition-colors">
                 {siteContent.contact.direct.instagram}
               </span>
             </a>
@@ -82,20 +82,20 @@ ${message}
         </div>
 
         {/* Static Contact Form */}
-        <div className="lg:col-span-7 bg-[#161617] rounded-3xl border border-[#A78040]/30 p-8 sm:p-10">
+        <div className="lg:col-span-7 bg-[var(--color-lower-form)] rounded-3xl border border-[var(--color-lower-gold)]/30 p-8 sm:p-10">
           {formSubmitted ? (
             <div className="py-12 text-center flex flex-col items-center">
               <SunDot size="lg" className="mb-4" />
-              <h3 className="text-2xl font-black text-[#FFFADE] mb-2">
+              <h3 className="text-2xl font-black text-[var(--color-lower-text)] mb-2">
                 پیام شما دریافت شد
               </h3>
-              <p className="text-sm text-[#C9B8B6] max-w-sm mb-6 leading-relaxed">
+              <p className="text-sm text-[var(--color-lower-muted)] max-w-sm mb-6 leading-relaxed">
                 همکاران ما در اولین فرصت از طریق ایمیل یا واتساپ با شما تماس خواهند گرفت.
               </p>
               <button
                 type="button"
                 onClick={() => setFormSubmitted(false)}
-                className="text-xs font-bold text-[#A78040] hover:text-[#FFFADE] underline"
+                className="text-xs font-bold text-[var(--color-lower-gold)] hover:text-[var(--color-lower-text)] underline"
               >
                 ارسال پیام دیگر
               </button>
@@ -105,7 +105,7 @@ ${message}
               <div>
                 <label
                   htmlFor="contact-name"
-                  className="block text-xs font-bold text-[#C9B8B6] mb-2"
+                  className="block text-xs font-bold text-[var(--color-lower-muted)] mb-2"
                 >
                   {siteContent.contact.form.namePlaceholder}
                 </label>
@@ -116,14 +116,14 @@ ${message}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="مثلاً: علیرضا محمدی"
-                  className="w-full rounded-full bg-[#FFFADE]/10 border border-[#A78040]/30 px-6 py-3.5 text-sm text-[#FFFADE] placeholder:text-[#C9B8B6]/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FFFADE] transition-colors"
+                  className="w-full rounded-full bg-[var(--color-lower-input)] border border-[var(--color-lower-gold)]/30 px-6 py-3.5 text-sm text-[var(--color-lower-text)] placeholder:text-[var(--color-lower-placeholder)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-lower-text)] transition-colors"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="contact-email"
-                  className="block text-xs font-bold text-[#C9B8B6] mb-2"
+                  className="block text-xs font-bold text-[var(--color-lower-muted)] mb-2"
                 >
                   {siteContent.contact.form.emailPlaceholder}
                 </label>
@@ -135,14 +135,14 @@ ${message}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@domain.com"
                   dir="ltr"
-                  className="w-full rounded-full bg-[#FFFADE]/10 border border-[#A78040]/30 px-6 py-3.5 text-sm text-[#FFFADE] placeholder:text-[#C9B8B6]/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FFFADE] transition-colors text-right"
+                  className="w-full rounded-full bg-[var(--color-lower-input)] border border-[var(--color-lower-gold)]/30 px-6 py-3.5 text-sm text-[var(--color-lower-text)] placeholder:text-[var(--color-lower-placeholder)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-lower-text)] transition-colors text-right"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="contact-msg"
-                  className="block text-xs font-bold text-[#C9B8B6] mb-2"
+                  className="block text-xs font-bold text-[var(--color-lower-muted)] mb-2"
                 >
                   {siteContent.contact.form.messagePlaceholder}
                 </label>
@@ -153,7 +153,7 @@ ${message}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="متن پیام، جزئیات سفارش یا پرسش..."
-                  className="w-full rounded-2xl bg-[#FFFADE]/10 border border-[#A78040]/30 px-6 py-3.5 text-sm text-[#FFFADE] placeholder:text-[#C9B8B6]/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FFFADE] transition-colors resize-none"
+                  className="w-full rounded-2xl bg-[var(--color-lower-input)] border border-[var(--color-lower-gold)]/30 px-6 py-3.5 text-sm text-[var(--color-lower-text)] placeholder:text-[var(--color-lower-placeholder)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-lower-text)] transition-colors resize-none"
                 />
               </div>
 
@@ -167,7 +167,7 @@ ${message}
                 </BrandButton>
 
                 {formSubmitted && (
-                  <p className="text-[0.75rem] text-[#A78040] text-center sm:text-start leading-snug">
+                  <p className="text-[0.75rem] text-[var(--color-lower-gold)] text-center sm:text-start leading-snug">
                     {siteContent.contact.form.successNote}
                   </p>
                 )}
