@@ -258,7 +258,7 @@ export const ProductMoment: React.FC = () => {
       ref={sectionRef}
       className="relative w-full bg-[var(--color-cream)] select-none"
       style={{
-        background: 'linear-gradient(180deg, var(--color-cream) 0%, #F5ECC9 50%, var(--color-cream) 100%)',
+        background: 'linear-gradient(180deg, var(--color-product-scroll-edge) 0%, var(--color-product-scroll-center) 50%, var(--color-product-scroll-edge) 100%)',
       }}
       aria-label="بخش آناتومی طعم و شبیه‌سازی سه‌بعدی پیاله SEA BREW"
     >
@@ -276,7 +276,7 @@ export const ProductMoment: React.FC = () => {
                 {currentStage.roman}
               </div>
               <div className="flex flex-col">
-                <span className="text-[11px] font-bold text-[var(--color-maroon)] uppercase tracking-widest flex items-center gap-1.5">
+                <span className="text-[11px] font-bold text-[var(--color-product-muted)] uppercase tracking-widest flex items-center gap-1.5">
                   <Sparkles className="w-3 h-3 text-[var(--color-gold)]" />
                   <span>{siteContent.productMoment.tag}</span>
                 </span>
@@ -303,13 +303,13 @@ export const ProductMoment: React.FC = () => {
                       isActive
                         ? 'bg-[var(--color-ink)] text-[var(--color-cream)] shadow-xs'
                         : isPassed
-                        ? 'bg-[var(--color-maroon)]/15 text-[var(--color-maroon)] hover:bg-[var(--color-maroon)]/25'
-                        : 'text-[var(--color-ink)]/50 hover:text-[var(--color-ink)]'
+                        ? 'bg-[var(--color-maroon)]/15 text-[var(--color-product-muted)] hover:bg-[var(--color-maroon)]/25'
+                        : 'text-[var(--color-ink)]/75 hover:text-[var(--color-ink)]'
                     }`}
                   >
                     <span>{s.roman}</span>
                     <span className="hidden lg:inline">{s.label}</span>
-                    {isPassed && <Check className="w-3 h-3 text-[var(--color-maroon)]" />}
+                    {isPassed && <Check className="w-3 h-3 text-[var(--color-product-muted)]" />}
                   </button>
                 );
               })}
@@ -332,7 +332,7 @@ export const ProductMoment: React.FC = () => {
                     className={`px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide whitespace-nowrap cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                       isActive
                         ? 'text-[var(--color-cream)] shadow-md scale-[1.03]'
-                        : 'text-[var(--color-ink)]/55 border border-[var(--color-gold)]/30 hover:text-[var(--color-ink)] hover:border-[var(--color-gold)]/60'
+                        : 'text-[var(--color-ink)]/75 border border-[var(--color-gold)]/30 hover:text-[var(--color-ink)] hover:border-[var(--color-gold)]/60'
                     }`}
                     style={isActive ? { backgroundColor: product.accent } : undefined}
                   >
@@ -410,7 +410,7 @@ export const ProductMoment: React.FC = () => {
                   >
                     گام {currentStage.roman}
                   </span>
-                  <span className="text-[11px] font-bold text-[var(--color-maroon)]">
+                  <span className="text-[11px] font-bold text-[var(--color-product-muted)]">
                     {currentStage.badge}
                   </span>
                 </div>
@@ -428,7 +428,7 @@ export const ProductMoment: React.FC = () => {
                 </p>
 
                 {/* Current step narrative — follows the pour animation */}
-                <p className="text-[11px] font-bold text-[var(--color-maroon)] mb-1.5 flex items-center gap-1.5">
+                <p className="text-[11px] font-bold text-[var(--color-product-muted)] mb-1.5 flex items-center gap-1.5">
                   <SunDot size="sm" animate={false} />
                   <span>{activeStep.title}</span>
                 </p>
@@ -438,7 +438,7 @@ export const ProductMoment: React.FC = () => {
 
                 {/* Selected product's ingredient list */}
                 <div className="border-t border-[var(--color-gold)]/25 pt-4">
-                  <div className="text-[11px] font-bold text-[var(--color-maroon)] mb-2 uppercase tracking-wider flex items-center gap-2">
+                  <div className="text-[11px] font-bold text-[var(--color-product-muted)] mb-2 uppercase tracking-wider flex items-center gap-2">
                     <span
                       className="w-2 h-2 rounded-full transition-colors duration-500"
                       style={{ backgroundColor: activeProductData.accent }}
@@ -463,7 +463,7 @@ export const ProductMoment: React.FC = () => {
               </div>
 
               {/* Bottom Scroll Cue Helper */}
-              <div className="mt-4 flex items-center justify-between text-xs font-medium text-[var(--color-maroon)]">
+              <div className="mt-4 flex items-center justify-between text-xs font-medium text-[var(--color-product-muted)]">
                 <div className="flex items-center gap-2">
                   <SunDot size="sm" animate={isReady} />
                   <span>
@@ -485,7 +485,7 @@ export const ProductMoment: React.FC = () => {
           </div>
 
           {/* Footer Bar: Authentic Attribution */}
-          <footer className="product-moment-footer flex items-center justify-center border-t border-[var(--color-gold)]/20 pt-3 text-[11px] font-semibold text-[var(--color-maroon)]/80">
+          <footer className="product-moment-footer flex items-center justify-center border-t border-[var(--color-gold)]/20 pt-3 text-[11px] font-semibold text-[var(--color-product-muted)]/80">
             <span>فرمول اختصاصی دم‌آوری سرد • SEA BREW</span>
           </footer>
         </div>

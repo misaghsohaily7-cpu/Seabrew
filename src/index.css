@@ -16,7 +16,9 @@
   --color-sun: #FDB716;
   --color-dust: #C9B8B6;
   --color-seaglass: #7FA096;
-
+  --color-product-scroll-edge: #F1E6C8;
+  --color-product-scroll-center: #E4D1A4;
+  --color-product-muted: #654719;
   --font-estedad: 'Estedad', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-sans: 'Estedad', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
@@ -31,6 +33,9 @@
   --color-sun: #FDB716;
   --color-dust: #C9B8B6;
   --color-seaglass: #7FA096;
+  --color-product-scroll-edge: #F1E6C8;
+  --color-product-scroll-center: #E4D1A4;
+  --color-product-muted: #654719;
   /* Mid-tone brand shades used by ArchDivider transitions */
   --color-parchment: #ece1cc;
   --color-dust-light: #D4C7C5;
@@ -50,6 +55,9 @@ html[data-theme="dark"] {
   --color-sun: #FDB716;
   --color-dust: #38302B;
   --color-seaglass: #7A9A90;
+  --color-product-scroll-edge: #17150D;
+  --color-product-scroll-center: #211C11;
+  --color-product-muted: #D8AE6E;
   --color-parchment: #2A251E;
   --color-dust-light: #2E2828;
   color-scheme: dark;
