@@ -24,7 +24,6 @@
 }
 
 :root {
-  --sticky-header-height: 5rem;
   --color-cream: #FFFADE;
   --color-ink: #161617;
   --color-gold: #A78040;
@@ -69,13 +68,7 @@ html {
 }
 
 section[id] {
-  scroll-margin-top: calc(var(--sticky-header-height) + 1rem);
-}
-
-@media (min-width: 768px) {
-  :root {
-    --sticky-header-height: 6rem;
-  }
+  scroll-margin-top: 1rem;
 }
 
 /* Strictly enforce no letter-spacing on Persian text */

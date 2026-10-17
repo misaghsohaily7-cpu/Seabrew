@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { siteContent } from '../../content';
 import { BrandButton } from './Button';
 import { SeaBrewLogo } from './SeaBrewLogo';
@@ -6,19 +6,6 @@ import { ThemeToggle } from './ThemeToggle';
 
 export const NavBar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const scrolledRef = useRef(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const nextScrolled = window.scrollY > 20;
-      if (nextScrolled === scrolledRef.current) return;
-      scrolledRef.current = nextScrolled;
-      setScrolled(nextScrolled);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Lock scroll when mobile menu is open
   useEffect(() => {
@@ -45,9 +32,7 @@ export const NavBar: React.FC = () => {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full bg-[var(--color-cream)] transition-shadow duration-300 ${
-        scrolled ? 'border-b border-[var(--color-gold)]/20 shadow-sm' : ''
-      }`}
+      className="relative z-50 w-full bg-[var(--color-cream)]"
       aria-label="ناوبری اصلی وبسایت"
     >
       <div className="max-w-[1440px] mx-auto px-[6vw] h-20 md:h-24 flex items-center justify-between">
