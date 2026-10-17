@@ -68,8 +68,8 @@ export const ProductMoment: React.FC = () => {
   const progressBarRef = useRef<HTMLDivElement>(null);
   const activeStageIndexRef = useRef(prefersReducedMotion() ? 3 : 0);
   const isReadyRef = useRef(initialProgress >= 0.88);
-  const [activeStageIndex, setActiveStageIndex] = useState<number>(activeStageIndexRef.current);
-  const [isReady, setIsReady] = useState<boolean>(isReadyRef.current);
+  const [activeStageIndex, setActiveStageIndex] = useState<number>(() => (prefersReducedMotion() ? 3 : 0));
+  const [isReady, setIsReady] = useState<boolean>(() => initialProgress >= 0.88);
   // Which product's recipe the anatomy section follows (tab selection)
   const [activeProduct, setActiveProduct] = useState<number>(0);
   const activeProductData = siteContent.productList[activeProduct];
@@ -164,7 +164,7 @@ export const ProductMoment: React.FC = () => {
     }
   }, []);
 
-  // Synchronized GSAP ScrollTrigger with a shorter, responsive mobile timeline.
+  // Give mobile gestures enough distance to scrub through each recipe stage deliberately.
   useEffect(() => {
     registerMotionPlugins();
 
@@ -191,10 +191,10 @@ export const ProductMoment: React.FC = () => {
       const trigger = ScrollTrigger.create({
         trigger: sectionRef.current,
         start: 'top top',
-        end: '+=960',
+        end: '+=2400',
         pin: pinContainerRef.current,
         anticipatePin: 1,
-        scrub: 0.25,
+        scrub: 0.4,
         invalidateOnRefresh: true,
         onUpdate: applyScrollProgress,
       });
@@ -372,14 +372,14 @@ export const ProductMoment: React.FC = () => {
               {/* Elegant Glass Tumbler Illustration — tilts in 3D space on hover */}
               <div
                 ref={glassTiltRef}
-                className="relative w-full h-full max-w-[420px] max-h-[480px] z-10 flex items-center justify-center"
+                className="product-moment-glass relative w-full h-full max-w-[420px] max-h-[480px] z-10 flex items-center justify-center"
                 style={{ transformStyle: 'preserve-3d', willChange: 'transform' }}
               >
                 <Glass2DCanvas
                   motionRef={glassMotionRef}
                   tint={activeProductData.accent}
                   recipe={activeProductData.id}
-                  className="w-full h-full"
+                  className="product-moment-glass-canvas w-full h-full"
                 />
                 {/* Specular highlight that catches the light as the glass tilts */}
                 <div
