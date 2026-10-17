@@ -42,8 +42,8 @@ const Glass2DCanvasView: React.FC<Glass2DCanvasProps> = ({
 
   // Initial values are rendered immediately; the visible SVG is then updated
   // in place so scroll and wave animation never trigger a React tree render.
-  const initialProgress = Math.max(0.06, Math.min(0.96, motionRef.current.progress));
-  const initialPouring = motionRef.current.isPouring;
+  const initialProgress = Math.max(0.06, Math.min(0.96, getReducedMotionPreference() ? 0.92 : 0.12));
+  const initialPouring = false;
   const isReduced = getReducedMotionPreference();
 
   const p = initialProgress;
