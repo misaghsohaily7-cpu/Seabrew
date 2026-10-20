@@ -33,7 +33,7 @@ interface ProductCardProps {
  * fixed form (arch panel + name + volume + ingredients), so new products are
  * added purely as data entries in `content.ts` (productList).
  *
- * Motion: scroll-triggered stagger entrance (clip + rise) + CSS-only hover
+ * Motion: scroll-triggered stagger entrance (fade + rise) + CSS-only hover
  * (lift, gold ring, image zoom, ingredient highlight).
  */
 export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, index }) => {
@@ -47,20 +47,20 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, in
       gsap.fromTo(
         cardRef.current,
         {
-          clipPath: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)',
+           
           opacity: 0,
-          y: 48,
+          y: 30,
         },
         {
-          clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+            
           opacity: 1,
           y: 0,
-          duration: 0.4,
+          duration: 0.8,
           ease: 'tide',
-          delay: (index % 3) * 0.04,
+          delay: (index % 3) * 0.12,
           scrollTrigger: {
             trigger: cardRef.current,
-            start: 'top 99%',
+            start: 'top 92%',
             toggleActions: 'play none none reverse',
           },
         }
