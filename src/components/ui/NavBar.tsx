@@ -56,7 +56,7 @@ export const NavBar: React.FC = () => {
                 e.preventDefault();
                 handleLinkClick(link.id);
               }}
-              className="relative py-2 text-sm font-bold text-[var(--color-ink)] opacity-80 hover:opacity-100 hover:text-[var(--color-maroon)] transition-all duration-250 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-ink)] rounded-full px-2"
+              className="group relative py-2 text-sm font-bold text-[var(--color-ink)] opacity-80 hover:opacity-100 hover:text-[var(--color-maroon)] transition-all duration-250 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-ink)] rounded-full px-2"
             >
               {link.label}
               <span className="absolute bottom-0 inset-x-2 h-[1.5px] bg-[var(--color-gold)] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center" />
@@ -116,6 +116,7 @@ export const NavBar: React.FC = () => {
             pointerEvents: mobileMenuOpen ? 'auto' : 'none',
           }}
           aria-hidden={!mobileMenuOpen}
+          inert={!mobileMenuOpen}
         >
           {/* Header spacer */}
           <div className="h-16 flex items-center justify-start">

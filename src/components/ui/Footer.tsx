@@ -11,13 +11,13 @@ export const Footer: React.FC = () => {
 
   return (
     <footer
-      className="relative w-full bg-[var(--color-lower-surface)] text-[var(--color-lower-text)] pt-16 pb-12 overflow-hidden border-t border-[var(--color-lower-gold)]/30 select-none"
+      className="relative w-full bg-[var(--color-lower-surface)] text-[var(--color-lower-text)] pt-16 pb-12 overflow-hidden border-t border-[var(--color-lower-gold)]/30"
       aria-label="فوتر پایانی وبسایت"
     >
       <div className="max-w-[1440px] mx-auto px-[6vw] flex flex-col items-center">
         {/* Scroll Progress TideLine completing at Footer */}
         <div className="w-full mb-12">
-          <TideLine trackScrollProgress={false} sunPosition={50} color="var(--color-lower-gold)" sunColor="#FDB716" />
+          <TideLine sunPosition={50} color="var(--color-lower-gold)" sunColor="#FDB716" />
         </div>
 
         {/* Static wordmark keeps the footer entrance motion-free. */}
@@ -65,7 +65,7 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Origin & back-to-top */}
-        <div className="w-full pt-8 border-t border-[var(--color-lower-gold)]/20 flex flex-wrap items-center justify-center gap-6 text-xs font-bold tracking-widest uppercase text-[var(--color-lower-muted)] opacity-[var(--color-lower-meta-opacity)]">
+        <div className="w-full pt-8 border-t border-[var(--color-lower-gold)]/20 flex flex-wrap items-center justify-center gap-6 text-xs font-bold uppercase text-[var(--color-lower-muted)] opacity-[var(--color-lower-meta-opacity)]">
           <span dir="ltr" className="font-mono text-[11px]">۲۸.۹۲۳۴° N, ۵۰.۸۲۶۴° E</span>
           <span>{siteContent.brand.origin}</span>
           <button

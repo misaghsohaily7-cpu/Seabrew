@@ -151,7 +151,12 @@ export const ProductMoment: React.FC = () => {
       progressBarRef.current.style.width = `${Math.round(progress * 100)}%`;
     }
 
-    const nextStage = progress < 0.32 ? 0 : progress < 0.62 ? 1 : progress < 0.78 ? 2 : 3;
+    // Single source of truth: each stage owns the threshold at which it becomes
+    // active, so the tracker, the jump buttons and the labels never disagree.
+    const nextStage = STAGES.reduce(
+      (current, stage, index) => (progress >= stage.threshold ? index : current),
+      0
+    );
     if (nextStage !== activeStageIndexRef.current) {
       activeStageIndexRef.current = nextStage;
       setActiveStageIndex(nextStage);
@@ -232,7 +237,7 @@ export const ProductMoment: React.FC = () => {
     const trigger = scrollTriggerInstance.current;
     if (!trigger) return;
 
-    const targetProgress = [0.08, 0.40, 0.68, 0.97][stageIndex];
+    const targetProgress = Math.max(0.08, Math.min(0.97, STAGES[stageIndex].threshold));
     const targetScroll = trigger.start + targetProgress * (trigger.end - trigger.start);
 
     const scrollObj = { y: window.scrollY || window.pageYOffset || 0 };
@@ -251,12 +256,15 @@ export const ProductMoment: React.FC = () => {
   }, []);
 
   const currentStage = STAGES[activeStageIndex];
+  // The pinned scrub scene is not created for reduced-motion visitors, so the
+  // jump buttons would be dead controls and must not be shown to them.
+  const reducedMotion = prefersReducedMotion();
 
   return (
     <section
       id="product"
       ref={sectionRef}
-      className="relative w-full bg-[var(--color-cream)] select-none"
+      className="relative w-full bg-[var(--color-cream)]"
       style={{
         background: 'linear-gradient(180deg, var(--color-product-scroll-edge) 0%, var(--color-product-scroll-center) 50%, var(--color-product-scroll-edge) 100%)',
       }}
@@ -286,34 +294,36 @@ export const ProductMoment: React.FC = () => {
               </div>
             </div>
 
-            {/* Middle: 4 Stage Progress Dots */}
-            <nav
-              aria-label="مراحل آماده‌سازی پیاله"
-              className="hidden md:flex items-center gap-2 bg-[var(--color-cream)]/80 backdrop-blur-xs px-3 py-1.5 rounded-full border border-[var(--color-gold)]/30 shadow-xs"
-            >
-              {STAGES.map((s, idx) => {
-                const isActive = activeStageIndex === idx;
-                const isPassed = activeStageIndex > idx;
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => jumpToStage(idx)}
-                    className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition-all duration-300 ${
-                      isActive
-                        ? 'bg-[var(--color-ink)] text-[var(--color-cream)] shadow-xs'
-                        : isPassed
-                        ? 'bg-[var(--color-maroon)]/15 text-[var(--color-product-muted)] hover:bg-[var(--color-maroon)]/25'
-                        : 'text-[var(--color-ink)]/75 hover:text-[var(--color-ink)]'
-                    }`}
-                  >
-                    <span>{s.roman}</span>
-                    <span className="hidden lg:inline">{s.label}</span>
-                    {isPassed && <Check className="w-3 h-3 text-[var(--color-product-muted)]" />}
-                  </button>
-                );
-              })}
-            </nav>
+            {/* Middle: 4 Stage Progress Dots (no-op without the pinned scene) */}
+            {!reducedMotion && (
+              <nav
+                aria-label="مراحل آماده‌سازی پیاله"
+                className="hidden md:flex items-center gap-2 bg-[var(--color-cream)]/80 backdrop-blur-xs px-3 py-1.5 rounded-full border border-[var(--color-gold)]/30 shadow-xs"
+              >
+                {STAGES.map((s, idx) => {
+                  const isActive = activeStageIndex === idx;
+                  const isPassed = activeStageIndex > idx;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => jumpToStage(idx)}
+                      className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition-all duration-300 ${
+                        isActive
+                          ? 'bg-[var(--color-ink)] text-[var(--color-cream)] shadow-xs'
+                          : isPassed
+                          ? 'bg-[var(--color-maroon)]/15 text-[var(--color-product-muted)] hover:bg-[var(--color-maroon)]/25'
+                          : 'text-[var(--color-ink)]/75 hover:text-[var(--color-ink)]'
+                      }`}
+                    >
+                      <span>{s.roman}</span>
+                      <span className="hidden lg:inline">{s.label}</span>
+                      {isPassed && <Check className="w-3 h-3 text-[var(--color-product-muted)]" />}
+                    </button>
+                  );
+                })}
+              </nav>
+            )}
             </div>
 
             {/* Product tabs — each product drives its own recipe & tint */}

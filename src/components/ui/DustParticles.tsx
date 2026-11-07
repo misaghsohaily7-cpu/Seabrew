@@ -39,8 +39,23 @@ export const DustParticles: React.FC<DustParticlesProps> = ({
 
     let animId = 0;
     let running = false;
-    let width = (canvas.width = canvas.parentElement?.clientWidth || window.innerWidth);
-    let height = (canvas.height = canvas.parentElement?.clientHeight || window.innerHeight);
+
+    // Draw at device pixel ratio (capped at 2x) so the particles stay crisp on
+    // retina screens while the simulation keeps working in CSS pixels.
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let width = canvas.parentElement?.clientWidth || window.innerWidth;
+    let height = canvas.parentElement?.clientHeight || window.innerHeight;
+
+    const sizeCanvas = () => {
+      if (canvas.parentElement) {
+        width = canvas.parentElement.clientWidth;
+        height = canvas.parentElement.clientHeight;
+      }
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    sizeCanvas();
 
     // Mouse tracker for subtle reactive drift
     let mouseX = width / 2;
@@ -63,11 +78,7 @@ export const DustParticles: React.FC<DustParticlesProps> = ({
       });
     }
 
-    const handleResize = () => {
-      if (!canvas.parentElement) return;
-      width = canvas.width = canvas.parentElement.clientWidth;
-      height = canvas.height = canvas.parentElement.clientHeight;
-    };
+    const handleResize = () => sizeCanvas();
 
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
@@ -91,6 +102,8 @@ export const DustParticles: React.FC<DustParticlesProps> = ({
     const render = (time: number) => {
       const dt = Math.min((time - lastTime) / 1000, 0.1);
       lastTime = time;
+      // Speeds are authored per 60fps frame, so scale them by elapsed time.
+      const frameScale = dt * 60;
 
       ctx.clearRect(0, 0, width, height);
 
@@ -102,8 +115,8 @@ export const DustParticles: React.FC<DustParticlesProps> = ({
         const driftX = Math.sin(p.phase) * 0.4;
         const driftY = Math.cos(p.phase * 0.8) * 0.2;
 
-        p.x += (p.vx + driftX);
-        p.y += (p.vy + driftY);
+        p.x += (p.vx + driftX) * frameScale;
+        p.y += (p.vy + driftY) * frameScale;
 
         // Repel slightly if mouse is nearby
         if (mouseActive) {
@@ -113,8 +126,8 @@ export const DustParticles: React.FC<DustParticlesProps> = ({
           if (distSq < 15000 && distSq > 0) {
             const dist = Math.sqrt(distSq);
             const force = (1 - dist / 122) * 1.5;
-            p.x += (dx / dist) * force;
-            p.y += (dy / dist) * force;
+            p.x += (dx / dist) * force * frameScale;
+            p.y += (dy / dist) * force * frameScale;
           }
         }
 

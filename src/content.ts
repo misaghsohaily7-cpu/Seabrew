@@ -162,13 +162,20 @@ export const siteContent = {
       emailPlaceholder: 'ایمیل یا شماره همراه',
       messagePlaceholder: 'پیام شما...',
       submitLabel: 'ارسال پیام',
-      successNote: 'پیام شما در برنامهٔ ایمیل باز شد — فقط دکمهٔ ارسال را بزنید.',
+      successTitle: 'پنجرهٔ ایمیل باز شد',
+      successNote:
+        'پیام شما در برنامهٔ ایمیل دستگاه باز شد؛ فقط دکمهٔ ارسال را در آن بزنید تا به دست ما برسد.',
+      successFallback:
+        'اگر پنجرهٔ ایمیل باز نشد، پیام را مستقیم از یکی از راه‌های زیر برای ما بفرستید.',
+      sendAnotherLabel: 'ارسال پیام دیگر',
+      invalidContact: 'یک ایمیل معتبر یا شماره همراه وارد کنید.',
     },
     direct: {
       whatsappLabel: 'پشتیبانی واتساپ',
       whatsapp: '+989191771369',
       instagramLabel: 'اینستاگرام',
       instagram: 'Seabrew_drinks',
+      emailLabel: 'ایمیل',
       email: 'hello@seabrew.ir',
     },
   },

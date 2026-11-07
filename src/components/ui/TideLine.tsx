@@ -1,47 +1,27 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React from 'react';
 
 interface TideLineProps {
   className?: string;
   sunPosition?: number; // 0 to 100 percentage
-  trackScrollProgress?: boolean;
   color?: string;
   sunColor?: string;
 }
 
+/**
+ * Horizontal horizon rule with a sun dot riding it.
+ *
+ * Purely presentational: page-level scroll progress is owned by
+ * SunScrollIndicator, so this component keeps no state and registers no
+ * scroll listener. Position the sun with `sunPosition`.
+ */
 export const TideLine: React.FC<TideLineProps> = ({
   className = '',
-  sunPosition,
-  trackScrollProgress = false,
+  sunPosition = 50,
   color = 'var(--color-gold)',
   sunColor = 'var(--color-sun)',
 }) => {
-  const [scrollProgress, setScrollProgress] = useState(50);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!trackScrollProgress) return;
-
-    const handleScroll = () => {
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (scrollHeight <= 0) return;
-      const currentProgress = Math.min(
-        100,
-        Math.max(0, (window.scrollY / scrollHeight) * 100)
-      );
-      setScrollProgress(currentProgress);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [trackScrollProgress]);
-
-  const activeProgress = trackScrollProgress ? scrollProgress : (sunPosition ?? 50);
-
   return (
     <div
-      ref={containerRef}
       className={`relative w-full h-[12px] flex items-center overflow-visible ${className}`}
       aria-hidden="true"
     >
@@ -58,7 +38,7 @@ export const TideLine: React.FC<TideLineProps> = ({
         className="absolute top-1/2 -translate-y-1/2 transition-all duration-300 ease-out pointer-events-none"
         style={{
           // In RTL, start to end
-          insetInlineStart: `${activeProgress}%`,
+          insetInlineStart: `${sunPosition}%`,
           transform: 'translate(-50%, -50%)',
         }}
       >

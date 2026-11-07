@@ -14,21 +14,13 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { CustomEase } from 'gsap/CustomEase';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
-import { SplitText } from 'gsap/SplitText';
-import { Flip } from 'gsap/Flip';
 
 let isRegistered = false;
 
 export function registerMotionPlugins() {
   if (typeof window === 'undefined' || isRegistered) return;
 
-  gsap.registerPlugin(
-    ScrollTrigger,
-    CustomEase,
-    DrawSVGPlugin,
-    SplitText,
-    Flip
-  );
+  gsap.registerPlugin(ScrollTrigger, CustomEase, DrawSVGPlugin);
 
   // Register CustomEase bezier curves
   CustomEase.create('tide', '0.22, 1, 0.36, 1');

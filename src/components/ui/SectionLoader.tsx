@@ -29,12 +29,12 @@ export const SectionLoader: React.FC<SectionLoaderProps> = ({
         <div className="relative flex items-center justify-center">
           <div className="w-12 h-12 rounded-full border-2 border-dashed border-[var(--color-sun)]/60 animate-spin" style={{ animationDuration: '6s' }} />
           <div className="absolute">
-            <SunDot size="sm" pulse={true} glow={true} color="var(--color-sun)" />
+            <SunDot size="sm" />
           </div>
         </div>
 
         {title && (
-          <p className="text-sm tracking-widest font-medium opacity-75">
+          <p className="text-sm font-medium opacity-75">
             {title}
           </p>
         )}

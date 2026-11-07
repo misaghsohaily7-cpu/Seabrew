@@ -12,16 +12,26 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
   const [isRemoved, setIsRemoved] = useState(() => prefersReducedMotion());
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const didCompleteRef = useRef(false);
+
   const dismiss = useCallback(() => {
-    setIsDismissed((prev) => {
-      if (prev) return prev;
+    setIsDismissed(true);
+  }, []);
+
+  // Notification and the removal timer are side effects, so they belong in an
+  // effect: React may run a state updater twice (StrictMode), which would have
+  // called onComplete twice when it lived inside setIsDismissed.
+  useEffect(() => {
+    if (!isDismissed) return;
+    if (!didCompleteRef.current) {
+      didCompleteRef.current = true;
       onComplete();
-      setTimeout(() => {
-        setIsRemoved(true);
-      }, 700);
-      return true;
-    });
-  }, [onComplete]);
+    }
+    const removalTimer = setTimeout(() => {
+      setIsRemoved(true);
+    }, 700);
+    return () => clearTimeout(removalTimer);
+  }, [isDismissed, onComplete]);
 
   useEffect(() => {
     // If user prefers reduced motion, notify onComplete and return

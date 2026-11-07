@@ -6,6 +6,7 @@ export const CustomCursor: React.FC = () => {
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const isVisibleRef = useRef(false);
   const [hoverState, setHoverState] = useState<'idle' | 'clickable' | 'magnetic'>('idle');
 
   useEffect(() => {
@@ -36,7 +37,10 @@ export const CustomCursor: React.FC = () => {
       ringX(e.clientX);
       ringY(e.clientY);
 
-      if (!isVisible) setIsVisible(true);
+      if (!isVisibleRef.current) {
+        isVisibleRef.current = true;
+        setIsVisible(true);
+      }
 
       // Lightweight target identification
       const target = e.target as HTMLElement | null;
@@ -53,6 +57,7 @@ export const CustomCursor: React.FC = () => {
     };
 
     const onMouseLeave = () => {
+      isVisibleRef.current = false;
       setIsVisible(false);
       currentHoverState = 'idle';
       setHoverState('idle');
@@ -65,7 +70,7 @@ export const CustomCursor: React.FC = () => {
       window.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseleave', onMouseLeave);
     };
-  }, [isVisible]);
+  }, []);
 
   return (
     <div

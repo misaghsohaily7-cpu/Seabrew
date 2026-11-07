@@ -8,7 +8,7 @@ export interface Product {
   name: string;
   tagline: string;
   image: string;
-  ingredients: string[];
+  ingredients: readonly string[];
 }
 
 // Bubbles sit inside the visible lower part of the drink (the frame is calibrated,
@@ -79,7 +79,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, in
       <div className="relative aspect-[4/5] w-full overflow-hidden">
         <img
           src={product.image}
-          alt={`برچسب رسمی محصول ${product.name} — ${product.persianName}`}
+          alt={`برچسب رسمی محصول ${product.name}`}
           loading="lazy"
           decoding="async"
           className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.035]"
@@ -109,7 +109,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, in
         </div>
 
         {/* Fixed 400cc badge — one identical design & position on every product */}
-        <span className="absolute bottom-9 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-full bg-[var(--color-ink)]/85 backdrop-blur-xs border border-[var(--color-gold)]/45 text-[10px] font-bold tracking-wider text-[var(--color-sun)] whitespace-nowrap leading-none">
+        <span className="absolute bottom-9 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-full bg-[var(--color-ink)]/85 backdrop-blur-xs border border-[var(--color-gold)]/45 text-[10px] font-bold text-[var(--color-sun)] whitespace-nowrap leading-none">
           ۴۰۰ سی‌سی
         </span>
       </div>
@@ -129,7 +129,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, in
 
         {/* Ingredients */}
         <div className="border-t border-[var(--color-gold)]/25 pt-4 w-full">
-          <div className="text-[10px] font-bold text-[var(--color-gold)] mb-2.5 uppercase tracking-widest">
+          <div className="text-[10px] font-bold text-[var(--color-gold)] mb-2.5 uppercase">
             ترکیبات
           </div>
           <ul className="flex flex-wrap justify-center gap-1.5">

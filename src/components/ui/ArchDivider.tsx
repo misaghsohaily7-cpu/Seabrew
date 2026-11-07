@@ -105,7 +105,7 @@ export const ArchDivider: React.FC<ArchDividerProps> = ({
             {/* Optional Narrative Label */}
             {label ? (
               <span
-                className={`text-[11px] sm:text-xs font-bold tracking-wider ${theme.textColor} whitespace-nowrap`}
+                className={`text-[11px] sm:text-xs font-bold ${theme.textColor} whitespace-nowrap`}
               >
                 {label}
               </span>

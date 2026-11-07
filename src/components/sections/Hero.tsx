@@ -432,7 +432,7 @@ export const Hero: React.FC<HeroProps> = ({ introReady = true }) => {
           <div className="flex items-center gap-3 mb-6">
             <span
               ref={subtitleRef}
-              className="text-[var(--color-maroon)] text-xs font-bold tracking-widest uppercase px-3.5 py-1.5 border border-[var(--color-maroon)] rounded-full inline-flex items-center gap-2"
+              className="text-[var(--color-maroon)] text-xs font-bold uppercase px-3.5 py-1.5 border border-[var(--color-maroon)] rounded-full inline-flex items-center gap-2"
             >
               <InkCoffeeBranch className="w-4 h-4 text-[var(--color-gold)]" />
               <span>{siteContent.hero.subtitle}</span>
